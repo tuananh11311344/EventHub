@@ -42,7 +42,7 @@ const ButtonComponent = (props: Props) => {
             {backgroundColor: color ?? appColors.primary, marginBottom: 17},
             styles,
           ]}>
-          {icon && icon}
+          {icon && iconFlex === 'left' && icon}
           <TextComponent
             text={text}
             color={textColor ?? appColors.white}
@@ -50,6 +50,8 @@ const ButtonComponent = (props: Props) => {
               textStyles,
               {
                 marginLeft: icon ? 12 : 0,
+                fontSize: 16,
+                textAlign: 'center',
               },
             ]}
             flex={icon && iconFlex === 'right' ? 1 : 0}

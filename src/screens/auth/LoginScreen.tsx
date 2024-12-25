@@ -14,7 +14,7 @@ import appColors from '../../constants/appColors';
 import {fontFamily} from '../../constants/fontFamily';
 import SocialLogin from './component/SocialLogin';
 
-const LoginScreen = () => {
+const LoginScreen = ({navigation}: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isRemember, setIsRemember] = useState(false);
@@ -37,7 +37,7 @@ const LoginScreen = () => {
         <InputComponent
           value={email}
           onChange={val => setEmail(val)}
-          placeholder="Email"
+          placeholder="abc@gmail.com"
           affix={<Sms size={22} color={appColors.gray} />}
           allowClear
         />
@@ -45,7 +45,7 @@ const LoginScreen = () => {
           value={password}
           onChange={val => setPassword(val)}
           isPassword
-          placeholder="Password"
+          placeholder="Your password"
           affix={<Lock size={22} color={appColors.gray} />}
         />
         <RowComponent justify="space-between">
@@ -61,7 +61,7 @@ const LoginScreen = () => {
           <ButtonComponent
             text="Forgot Password?"
             type="text"
-            onPress={() => console.log('Forgot Password')}
+            onPress={() => navigation.navigate('ForgotPassword')}
           />
         </RowComponent>
       </SectionComponent>
@@ -73,7 +73,7 @@ const LoginScreen = () => {
       <SectionComponent>
         <RowComponent>
           <TextComponent text="Don’t have an account? " />
-          <ButtonComponent text="Sign up" type="link" onPress={() => {}} />
+          <ButtonComponent text="Sign up" type="link" onPress={() => navigation.navigate("SignUpScreen")} />
         </RowComponent>
       </SectionComponent>
     </ContainerComponent>
