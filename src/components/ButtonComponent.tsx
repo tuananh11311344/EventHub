@@ -15,6 +15,7 @@ interface Props {
   textStyles?: StyleProp<ViewStyle>;
   onPress: () => void;
   iconFlex?: 'right' | 'left';
+  textFont?: string;
 }
 
 const ButtonComponent = (props: Props) => {
@@ -28,6 +29,7 @@ const ButtonComponent = (props: Props) => {
     textStyles,
     onPress,
     iconFlex,
+    textFont,
   } = props;
   return (
     <>
@@ -36,7 +38,8 @@ const ButtonComponent = (props: Props) => {
           onPress={onPress}
           style={[
             globalStyle.button,
-            {backgroundColor: color ?? appColors.primary},
+            globalStyle.shadow,
+            {backgroundColor: color ?? appColors.primary, marginBottom: 17},
             styles,
           ]}>
           {icon && icon}
@@ -50,7 +53,7 @@ const ButtonComponent = (props: Props) => {
               },
             ]}
             flex={icon && iconFlex === 'right' ? 1 : 0}
-            font={fontFamily.semiBold}
+            font={textFont ? textFont : fontFamily.medium}
           />
           {icon && iconFlex === 'right' && icon}
         </TouchableOpacity>
