@@ -3,6 +3,7 @@ import {StyleProp, TouchableOpacity, ViewStyle} from 'react-native';
 import appColors from '../constants/appColors';
 import {globalStyle} from '../styles/GlobalStyle';
 import TextComponent from './TextComponent';
+import {fontFamily} from '../constants/fontFamily';
 
 interface Props {
   icon?: ReactNode;
@@ -49,12 +50,16 @@ const ButtonComponent = (props: Props) => {
               },
             ]}
             flex={icon && iconFlex === 'right' ? 1 : 0}
+            font={fontFamily.semiBold}
           />
           {icon && iconFlex === 'right' && icon}
         </TouchableOpacity>
       ) : (
         <TouchableOpacity onPress={onPress}>
-          <TextComponent text={text} />
+          <TextComponent
+            text={text}
+            color={type === 'link' ? appColors.primary : appColors.text}
+          />
         </TouchableOpacity>
       )}
     </>
