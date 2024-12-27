@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {Image, Switch} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Alert, Image, Switch} from 'react-native';
 import {
   ButtonComponent,
   InputComponent,
@@ -14,21 +14,59 @@ import appColors from '../../constants/appColors';
 import {fontFamily} from '../../constants/fontFamily';
 import SocialLogin from './component/SocialLogin';
 import authenticationAPI from '../../api/AuthApi';
+import {Validate} from '../../utils/validate';
+import {useDispatch} from 'react-redux';
+import {addAuth} from '../../redux/reducers/authReducer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({navigation}: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isRemember, setIsRemember] = useState(false);
+  const [isRemember, setIsRemember] = useState(true);
+  const dispatch = useDispatch();
 
-  const handleLogin = async() =>{
+  useEffect(() =>{
+    getEmailInLocal();
+  },[])
+
+  const getEmailInLocal = async () => {
     try {
-      const res = await authenticationAPI.HandleAuthentication('/hello');
-      console.log(res);
+      const res = await AsyncStorage.getItem('auth'); 
+      if (res) {
+        const parsedRes = JSON.parse(res);
+        if (parsedRes.email) {
+          setEmail(parsedRes.email);
+        }
+      }
     } catch (error) {
-      console.log(error);
-      
+      console.error('Error parsing auth data:', error);
     }
-  }
+  };
+  
+
+  const handleLogin = async () => {
+    const emailValidation = Validate.email(email);
+    if (emailValidation) {
+      try {
+        const res = await authenticationAPI.HandleAuthentication(
+          '/login',
+          {email, password},
+          'post',
+        );
+        dispatch(addAuth(res.data));
+        await AsyncStorage.setItem(
+          'auth',
+          isRemember
+            ? JSON.stringify(res.data)
+            : JSON.stringify({email, accessToken: res.data.accessToken}),
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      Alert.alert('Email is not correct!!!');
+    }
+  };
   return (
     <ContainerComponent isImageBackground isScroll>
       <SectionComponent
@@ -80,11 +118,15 @@ const LoginScreen = ({navigation}: any) => {
       <SectionComponent>
         <ButtonComponent text="SIGN IN" type="primary" onPress={handleLogin} />
       </SectionComponent>
-        <SocialLogin />
+      <SocialLogin />
       <SectionComponent>
         <RowComponent>
           <TextComponent text="Don’t have an account? " />
-          <ButtonComponent text="Sign up" type="link" onPress={() => navigation.navigate("SignUpScreen")} />
+          <ButtonComponent
+            text="Sign up"
+            type="link"
+            onPress={() => navigation.navigate('SignUpScreen')}
+          />
         </RowComponent>
       </SectionComponent>
     </ContainerComponent>

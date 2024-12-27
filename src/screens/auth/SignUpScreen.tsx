@@ -1,36 +1,62 @@
-import {Lock, Sms} from 'iconsax-react-native';
-import React, {useState} from 'react';
-import {Switch} from 'react-native';
+import {Lock, Sms, User} from 'iconsax-react-native';
+import React, {useEffect, useState} from 'react';
+import {useDispatch} from 'react-redux';
 import {
   ButtonComponent,
+  ContainerComponent,
   InputComponent,
   RowComponent,
   SectionComponent,
   SpaceComponent,
   TextComponent,
 } from '../../components';
-import ContainerComponent from '../../components/ContainerComponent';
+import {LoadingModal} from '../../modals';
+import {Validate} from '../../utils/validate';
+import authenticationAPI from '../../api/AuthApi';
 import appColors from '../../constants/appColors';
 import SocialLogin from './component/SocialLogin';
-import {LoadingModal} from '../../modals';
-import authenticationAPI from '../../api/AuthApi';
-import {Validate} from '../../utils/validate';
-import { useDispatch } from 'react-redux';
-import { addAuth } from '../../redux/reducers/authReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {addAuth} from '../../redux/reducers/authReducer';
+
+interface ValueModel {
+  fullname: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
 
 const initValue = {
-  username: '',
+  fullname: '',
   email: '',
   password: '',
   confirmPassword: '',
 };
 
 const SignUpScreen = ({navigation}: any) => {
-  const [values, setValues] = useState(initValue);
+  const [values, setValues] = useState<ValueModel>(initValue);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState<any>();
+  const [isDisable, setIsDisable] = useState(true);
+
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (
+      !errorMessage ||
+      (errorMessage &&
+        (errorMessage.email ||
+          errorMessage.password ||
+          errorMessage.confirmPassword || errorMessage.fullname)) ||
+      !values.email ||
+      !values.password ||
+      !values.confirmPassword ||
+      !values.fullname
+    ) {
+      setIsDisable(true);
+    } else {
+      setIsDisable(false);
+    }
+  }, [errorMessage, values]);
 
   const handleChangeValue = (key: string, value: string) => {
     const data: any = {...values};
@@ -39,98 +65,129 @@ const SignUpScreen = ({navigation}: any) => {
     setValues(data);
   };
 
-  const handleRegister = async () => {
+  const formValidator = (key: string) => {
+    const data = {...errorMessage};
+    let message = ``;
 
-    const {email, password, confirmPassword} = values;
-    const emailValidation = Validate.email(email);
-    const passwordValidation = Validate.Password(password);
-
-    if (email && password && confirmPassword) {
-      if (emailValidation && passwordValidation) {
-        setErrorMessage('');
-        setIsLoading(true);
-        try {
-          const res = await authenticationAPI.HandleAuthentication(
-            '/register',
-            {
-              fullname: values.username,
-              email,
-              password,
-            },
-            'post',
-          );
-
-          dispatch(addAuth(res.data));
-          await AsyncStorage.setItem('auth', JSON.stringify(res.data));
-          
-          setIsLoading(false);
-        } catch (error) {
-          console.log(error);
-          setIsLoading(false);
+    switch (key) {
+      case 'fullname':
+        if (!values.fullname) {
+          message = `Full name is required!!!`;
+        } else {
+          message = '';
         }
-      } else {
-        setErrorMessage('Email not correct');
-      }
-    } else {
-      setErrorMessage('Vui lòng nhập đầy đủ thông tin');
+
+        break;
+      case 'email':
+        if (!values.email) {
+          message = `Email is required!!!`;
+        } else if (!Validate.email(values.email)) {
+          message = 'Email is not invalid!!';
+        } else {
+          message = '';
+        }
+
+        break;
+
+      case 'password':
+        if (!values.password) {
+          message = `Password is required!!!`;
+        } else if (!Validate.Password(values.password)) {
+          message = 'The password length must be greater than eight';
+        } else {
+          message = '';
+        }
+        break;
+
+      case 'confirmPassword':
+        if (!values.confirmPassword) {
+          message = `Please type confirm password!!`;
+        } else if (values.confirmPassword !== values.password) {
+          message = 'Password is not match!!!';
+        } else {
+          message = '';
+        }
+
+        break;
     }
+
+    data[`${key}`] = message;
+
+    setErrorMessage(data);
+  };
+
+  const handleRegister = async () => {
+   const api = `/verification`;
+   try {
+    const res = await authenticationAPI.HandleAuthentication(api, {email: values.email}, 'post');
+
+    console.log(res)
+   } catch (error) {
+    
+   }
   };
 
   return (
     <>
       <ContainerComponent isImageBackground isScroll back>
         <SectionComponent>
-          <TextComponent title size={24} text="Sign up" />
+          <TextComponent size={24} title text="Sign up" />
           <SpaceComponent height={21} />
           <InputComponent
-            value={values.username}
-            onChange={val => handleChangeValue('username', val)}
+            value={values.fullname}
             placeholder="Full name"
-            affix={<Sms size={22} color={appColors.gray} />}
+            onChange={val => handleChangeValue('fullname', val)}
             allowClear
+            affix={<User size={22} color={appColors.gray} />}
+            onEnd={() => formValidator('fullname')}
+            errorMessage={errorMessage?.fullname}
           />
           <InputComponent
             value={values.email}
+            placeholder="abc@email.com"
             onChange={val => handleChangeValue('email', val)}
-            placeholder="abc@gmail.com"
-            affix={<Sms size={22} color={appColors.gray} />}
             allowClear
+            affix={<Sms size={22} color={appColors.gray} />}
+            onEnd={() => formValidator('email')}
+            errorMessage={errorMessage?.email}
           />
           <InputComponent
             value={values.password}
+            placeholder="Password"
             onChange={val => handleChangeValue('password', val)}
             isPassword
-            placeholder="Your password"
+            allowClear
             affix={<Lock size={22} color={appColors.gray} />}
+            onEnd={() => formValidator('password')}
+            errorMessage={errorMessage?.password}
           />
           <InputComponent
             value={values.confirmPassword}
+            placeholder="Confirm password"
             onChange={val => handleChangeValue('confirmPassword', val)}
             isPassword
-            placeholder="Confirm password"
+            allowClear
             affix={<Lock size={22} color={appColors.gray} />}
+            onEnd={() => formValidator('confirmPassword')}
+            errorMessage={errorMessage?.confirmPassword}
           />
-        </SectionComponent>
-        <SectionComponent>
-          {errorMessage && (
-            <TextComponent text={errorMessage} color={appColors.danger} />
-          )}
         </SectionComponent>
         <SpaceComponent height={16} />
         <SectionComponent>
           <ButtonComponent
-            text="SIGN UP"
-            type="primary"
             onPress={handleRegister}
+            text="SIGN UP"
+            disable={isDisable}
+            type="primary"
           />
         </SectionComponent>
         <SocialLogin />
         <SectionComponent>
-          <RowComponent>
-            <TextComponent text="Already have an account? " />
+          <RowComponent justify="center">
+            <TextComponent text="Don’t have an account? " />
             <ButtonComponent
-              text="Sign in"
               type="link"
+              text="Sign in"
               onPress={() => navigation.navigate('LoginScreen')}
             />
           </RowComponent>
