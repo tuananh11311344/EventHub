@@ -18,53 +18,57 @@ import {Validate} from '../../utils/validate';
 import {useDispatch} from 'react-redux';
 import {addAuth} from '../../redux/reducers/authReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {AuthFormValues, validateAuthField} from '../../utils/authValidation';
 
 const LoginScreen = ({navigation}: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isRemember, setIsRemember] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<any>();
   const dispatch = useDispatch();
+  const [isDisable, setIsDisable] = useState(true);
 
-  useEffect(() =>{
-    getEmailInLocal();
-  },[])
 
-  const getEmailInLocal = async () => {
-    try {
-      const res = await AsyncStorage.getItem('auth'); 
-      if (res) {
-        const parsedRes = JSON.parse(res);
-        if (parsedRes.email) {
-          setEmail(parsedRes.email);
-        }
-      }
-    } catch (error) {
-      console.error('Error parsing auth data:', error);
+  useEffect(() => {
+    if (
+      !errorMessage ||
+      (errorMessage && (errorMessage.email || errorMessage.password)) ||
+      !email ||
+      !password
+    ) {
+      setIsDisable(true);
+    } else {
+      setIsDisable(false);
     }
+  }, [errorMessage, email, password]);
+
+
+
+  const formValidator = (key: string, values: AuthFormValues) => {
+    const data = {...errorMessage};
+    data[key] = validateAuthField(key, values);
+    setErrorMessage(data);
   };
-  
 
   const handleLogin = async () => {
-    const emailValidation = Validate.email(email);
-    if (emailValidation) {
-      try {
-        const res = await authenticationAPI.HandleAuthentication(
-          '/login',
-          {email, password},
-          'post',
-        );
-        dispatch(addAuth(res.data));
-        await AsyncStorage.setItem(
-          'auth',
-          isRemember
-            ? JSON.stringify(res.data)
-            : JSON.stringify({email, accessToken: res.data.accessToken}),
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    } else {
-      Alert.alert('Email is not correct!!!');
+    try {
+      const res = await authenticationAPI.HandleAuthentication(
+        '/login',
+        {email, password},
+        'post',
+      );
+
+      console.log("res data:", res.data);
+      
+      dispatch(addAuth(res.data));
+      await AsyncStorage.setItem(
+        'auth',
+        isRemember
+          ? JSON.stringify(res.data)
+          : JSON.stringify({email, accessToken: res.data.accessToken}),
+      );
+    } catch (error) {
+      console.log(error);
     }
   };
   return (
@@ -89,6 +93,8 @@ const LoginScreen = ({navigation}: any) => {
           placeholder="abc@gmail.com"
           affix={<Sms size={22} color={appColors.gray} />}
           allowClear
+          onEnd={() => formValidator('email', {email: email})}
+          errorMessage={errorMessage?.email}
         />
         <InputComponent
           value={password}
@@ -96,6 +102,8 @@ const LoginScreen = ({navigation}: any) => {
           isPassword
           placeholder="Your password"
           affix={<Lock size={22} color={appColors.gray} />}
+          onEnd={() => formValidator('password', {password: password})}
+          errorMessage={errorMessage?.password}
         />
         <RowComponent justify="space-between">
           <RowComponent>
@@ -116,7 +124,12 @@ const LoginScreen = ({navigation}: any) => {
       </SectionComponent>
       <SpaceComponent height={16} />
       <SectionComponent>
-        <ButtonComponent text="SIGN IN" type="primary" onPress={handleLogin} />
+        <ButtonComponent
+          disable={isDisable}
+          text="SIGN IN"
+          type="primary"
+          onPress={handleLogin}
+        />
       </SectionComponent>
       <SocialLogin />
       <SectionComponent>

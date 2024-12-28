@@ -20,7 +20,7 @@ import {addAuth} from '../../redux/reducers/authReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Verification = ({navigation, route}: any) => {
-  const {code, email, password, fullname} = route.params;
+  const {code, email, password, fullname, type} = route.params;
   const [codeValue, setCodeValue] = useState('');
   const [limit, setLimit] = useState(120);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +37,25 @@ const Verification = ({navigation, route}: any) => {
       return () => clearInterval(interval);
     }
   }, [limit]);
+
+  useEffect(() => {
+    handleSendVerification();
+  }, []);
+
+  const handleSendVerification = async () => {
+    const api = '/verification';
+
+    try {
+      const res = await authenticationAPI.HandleAuthentication(
+        api,
+        {email},
+        'post',
+      );
+      setCurrentCode(res.data);
+    } catch (error) {
+      console.log('send verification code error', error);
+    }
+  };
 
   const handleResendVerification = async () => {
     const api = '/verification';
@@ -65,25 +84,37 @@ const Verification = ({navigation, route}: any) => {
         'Time out verification code, plase resend new verification code',
       );
     } else {
-      if (Number(codeValue) === currentCode) {
-        const api = '/register';
-        const data = {
-          email,
-          password,
-          fullname,
-        };
-        try {
-          const res = await authenticationAPI.HandleAuthentication(
-            api,
-            data,
-            'post',
-          );
-          dispatch(addAuth(res.data));
+      
+      if (Number(codeValue) === Number(currentCode)) {
+        switch (type) {
+          case 'register':
+            const api = '/register';
+            const data = {
+              email,
+              password,
+              fullname,
+            };
+            try {
+              const res = await authenticationAPI.HandleAuthentication(
+                api,
+                data,
+                'post',
+              );
+              dispatch(addAuth(res.data));
 
-          await AsyncStorage.setItem('auth', JSON.stringify(res.data));
-        } catch (error) {
-          setErrorMessage('User has already exist!!!');
-          console.log('Can not create new user ', error);
+              await AsyncStorage.setItem('auth', JSON.stringify(res.data));
+            } catch (error) {
+              setErrorMessage('User has already exist!!!');
+              console.log('Can not create new user ', error);
+            }
+            break;
+          case 'resetPassword':
+            navigation.navigate('ChangePassword', {
+              email: email,
+            });
+            break;
+          default:
+            break;
         }
       } else {
         setErrorMessage('Invalid code!!!');

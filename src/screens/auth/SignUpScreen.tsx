@@ -1,6 +1,6 @@
-import {Lock, Sms, User} from 'iconsax-react-native';
-import React, {useEffect, useState} from 'react';
-import {useDispatch} from 'react-redux';
+import { Lock, Sms, User } from 'iconsax-react-native';
+import React, { useEffect, useState } from 'react';
+import authenticationAPI from '../../api/AuthApi';
 import {
   ButtonComponent,
   ContainerComponent,
@@ -10,13 +10,10 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../../components';
-import {LoadingModal} from '../../modals';
-import {Validate} from '../../utils/validate';
-import authenticationAPI from '../../api/AuthApi';
 import appColors from '../../constants/appColors';
+import { LoadingModal } from '../../modals';
+import { validateAuthField } from '../../utils/authValidation';
 import SocialLogin from './component/SocialLogin';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {addAuth} from '../../redux/reducers/authReducer';
 
 interface ValueModel {
   fullname: string;
@@ -37,8 +34,6 @@ const SignUpScreen = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<any>();
   const [isDisable, setIsDisable] = useState(true);
-
-  const dispatch = useDispatch();
 
   useEffect(() => {
     if (
@@ -62,58 +57,12 @@ const SignUpScreen = ({navigation}: any) => {
   const handleChangeValue = (key: string, value: string) => {
     const data: any = {...values};
     data[`${key}`] = value;
-
     setValues(data);
   };
 
   const formValidator = (key: string) => {
     const data = {...errorMessage};
-    let message = ``;
-
-    switch (key) {
-      case 'fullname':
-        if (!values.fullname) {
-          message = `Full name is required!!!`;
-        } else {
-          message = '';
-        }
-
-        break;
-      case 'email':
-        if (!values.email) {
-          message = `Email is required!!!`;
-        } else if (!Validate.email(values.email)) {
-          message = 'Email is not invalid!!';
-        } else {
-          message = '';
-        }
-
-        break;
-
-      case 'password':
-        if (!values.password) {
-          message = `Password is required!!!`;
-        } else if (!Validate.Password(values.password)) {
-          message = 'The password length must be greater than eight';
-        } else {
-          message = '';
-        }
-        break;
-
-      case 'confirmPassword':
-        if (!values.confirmPassword) {
-          message = `Please type confirm password!!`;
-        } else if (values.confirmPassword !== values.password) {
-          message = 'Password is not match!!!';
-        } else {
-          message = '';
-        }
-
-        break;
-    }
-
-    data[`${key}`] = message;
-
+    data[key] = validateAuthField(key, values);
     setErrorMessage(data);
   };
 
@@ -128,16 +77,15 @@ const SignUpScreen = ({navigation}: any) => {
       );
       navigation.navigate('Verification', {
         email: values.email,
-        password: values.email,
+        password: values.password,
         fullname: values.fullname,
         code: res.data,
+        type: 'register'
       });
       setIsLoading(false);
-
     } catch (error) {
       console.log(error);
       setIsLoading(false);
-      
     }
   };
 
@@ -198,7 +146,7 @@ const SignUpScreen = ({navigation}: any) => {
         <SocialLogin />
         <SectionComponent>
           <RowComponent justify="center">
-            <TextComponent text="Don’t have an account? " />
+            <TextComponent text="Don't have an account? " />
             <ButtonComponent
               type="link"
               text="Sign in"

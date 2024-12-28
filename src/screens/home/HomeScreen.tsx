@@ -13,7 +13,7 @@ const HomeScreen = () => {
       <Button
         title="Logout"
         onPress={async () => {
-          await AsyncStorage.setItem('auth', JSON.stringify({email:  auth.email}));
+          await AsyncStorage.clear();
           await dispatch(removeAuth());
         }}
       />
