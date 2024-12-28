@@ -46,7 +46,8 @@ const SignUpScreen = ({navigation}: any) => {
       (errorMessage &&
         (errorMessage.email ||
           errorMessage.password ||
-          errorMessage.confirmPassword || errorMessage.fullname)) ||
+          errorMessage.confirmPassword ||
+          errorMessage.fullname)) ||
       !values.email ||
       !values.password ||
       !values.confirmPassword ||
@@ -117,14 +118,27 @@ const SignUpScreen = ({navigation}: any) => {
   };
 
   const handleRegister = async () => {
-   const api = `/verification`;
-   try {
-    const res = await authenticationAPI.HandleAuthentication(api, {email: values.email}, 'post');
+    setIsLoading(true);
+    const api = `/verification`;
+    try {
+      const res = await authenticationAPI.HandleAuthentication(
+        api,
+        {email: values.email},
+        'post',
+      );
+      navigation.navigate('Verification', {
+        email: values.email,
+        password: values.email,
+        fullname: values.fullname,
+        code: res.data,
+      });
+      setIsLoading(false);
 
-    console.log(res)
-   } catch (error) {
-    
-   }
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      
+    }
   };
 
   return (
