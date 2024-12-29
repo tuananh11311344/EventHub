@@ -1,6 +1,5 @@
-import {View, Text} from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import TabNavigator from './TabNavigator';
 
 const MainNavigator = () => {
