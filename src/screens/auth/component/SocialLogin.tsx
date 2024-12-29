@@ -1,5 +1,5 @@
 import {View, Text} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {
   ButtonComponent,
   SectionComponent,
@@ -8,9 +8,44 @@ import {
 } from '../../../components';
 import appColors from '../../../constants/appColors';
 import {fontFamily} from '../../../constants/fontFamily';
-import { Facebook, Google } from '../../../assets/svgs';
+import {Facebook, Google} from '../../../assets/svgs';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import authenticationAPI from '../../../api/AuthApi';
+import {useDispatch} from 'react-redux';
+import {addAuth} from '../../../redux/reducers/authReducer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+GoogleSignin.configure({
+  webClientId:
+    '741364031381-4i57gco62u8kphgs89b5rsi4ru5hpjap.apps.googleusercontent.com',
+});
 
 const SocialLogin = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  const handleLoginWithGoogle = async () => {
+    const api = '/google-signin';
+    await GoogleSignin.hasPlayServices({
+      showPlayServicesUpdateDialog: true,
+    });
+
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const user = userInfo.data?.user;
+
+      const res = await authenticationAPI.HandleAuthentication(
+        api,
+        user,
+        'post',
+      );
+
+      dispatch(addAuth(res.data));
+      await AsyncStorage.setItem('auth', JSON.stringify(res.data));
+    } catch (error) {
+      console.log('Sign in with google error: ', error);
+    }
+  };
   return (
     <SectionComponent>
       <TextComponent
@@ -20,15 +55,15 @@ const SocialLogin = () => {
         size={16}
         font={fontFamily.medium}
       />
-      <SpaceComponent height={16}/>
+      <SpaceComponent height={16} />
       <ButtonComponent
         text="Login with Google"
         icon={<Google />}
         color={appColors.white}
         textColor={appColors.text}
-        type='primary'
-        onPress={() => {}}
-        iconFlex='left'
+        type="primary"
+        onPress={handleLoginWithGoogle}
+        iconFlex="left"
         textFont={fontFamily.regular}
       />
       <ButtonComponent
@@ -36,9 +71,9 @@ const SocialLogin = () => {
         icon={<Facebook />}
         color={appColors.white}
         textColor={appColors.text}
-        type='primary'
+        type="primary"
         onPress={() => {}}
-        iconFlex='left'
+        iconFlex="left"
         textFont={fontFamily.regular}
       />
     </SectionComponent>
