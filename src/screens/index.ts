@@ -2,6 +2,7 @@ import AddNewScreen from "./AddNewScreen";
 import LoginScreen from "./auth/LoginScreen";
 import OnboardingScren from "./auth/OnboardingScren";
 import EventsScreen from "./events/EventsScreen";
+import SearchEvents from "./events/SearchEvents";
 import HomeScreen from "./home/HomeScreen";
 import MapScreen from "./maps/MapScreen";
 import ProfileScreen from "./profiles/ProfileScreen";
@@ -15,5 +16,6 @@ export{
     AddNewScreen,
     EventsScreen,
     MapScreen,
-    ProfileScreen
+    ProfileScreen,
+    SearchEvents
 }

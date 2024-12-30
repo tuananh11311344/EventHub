@@ -1,11 +1,19 @@
-import {HambergerMenu, Notification} from 'iconsax-react-native';
+import {
+  HambergerMenu,
+  Notification,
+  SearchNormal1,
+  Sort,
+} from 'iconsax-react-native';
 import React from 'react';
 import {StatusBar, TouchableOpacity, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {
+  CategoriesList,
   CircleComponent,
   ContainerComponent,
   RowComponent,
+  SpaceComponent,
+  TagComponent,
   TextComponent,
 } from '../../components';
 import appColors from '../../constants/appColors';
@@ -14,7 +22,7 @@ import {authSelector} from '../../redux/reducers/authReducer';
 import {globalStyle} from '../../styles/GlobalStyle';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}: any) => {
   const dispatch = useDispatch();
   const auth = useSelector(authSelector);
   return (
@@ -30,15 +38,19 @@ const HomeScreen = () => {
           paddingHorizontal: 16,
         }}>
         <RowComponent>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <HambergerMenu size={24} color={appColors.white} />
           </TouchableOpacity>
           <View style={{flex: 1, alignItems: 'center'}}>
             <RowComponent>
-              <TextComponent text="Current Location" color={appColors.white} />
+              <TextComponent
+                text="Current Location"
+                size={13}
+                color={appColors.white}
+              />
               <MaterialIcons
                 name="arrow-drop-down"
-                size={18}
+                size={20}
                 color={appColors.white}
               />
             </RowComponent>
@@ -68,10 +80,57 @@ const HomeScreen = () => {
             </View>
           </CircleComponent>
         </RowComponent>
+        <SpaceComponent height={20} />
+        <RowComponent>
+          <RowComponent
+            styles={{flex: 1}}
+            onPress={() =>
+              navigation.navigate('SearchEvents', {
+                isFilter: false,
+              })
+            }>
+            <SearchNormal1
+              variant="TwoTone"
+              color={appColors.white}
+              size={20}
+            />
+            <View
+              style={{
+                width: 1,
+                height: 20,
+                backgroundColor: appColors.gray2,
+                marginHorizontal: 10,
+              }}
+            />
+            <TextComponent
+              flex={1}
+              text="Search..."
+              color={appColors.gray2}
+              size={16}
+            />
+          </RowComponent>
+          <TagComponent
+            onPress={() =>
+              navigation.navigate('SearchEvents', {
+                isFilter: true,
+              })
+            }
+            label="Filters"
+            bgColor="#5D56F3"
+            icon={
+              <CircleComponent size={20} color="#A29EF0">
+                <Sort size={16} color="#5D56F3" />
+              </CircleComponent>
+            }
+          />
+        </RowComponent>
+        <SpaceComponent height={15} />
+        <CategoriesList isColor />
       </View>
-      <ContainerComponent isScroll>
+      <View style={{flex: 1}}></View>
+      {/* <ContainerComponent isScroll>
         <TextComponent text="123" />
-      </ContainerComponent>
+      </ContainerComponent> */}
     </View>
   );
 };
