@@ -5,14 +5,26 @@ import {
   Sort,
 } from 'iconsax-react-native';
 import React from 'react';
-import {StatusBar, TouchableOpacity, View} from 'react-native';
+import {
+  FlatList,
+  ImageBackground,
+  ScrollView,
+  StatusBar,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {
+  ButtonComponent,
+  CardComponent,
   CategoriesList,
   CircleComponent,
   ContainerComponent,
+  EventItem,
   RowComponent,
+  SectionComponent,
   SpaceComponent,
+  TabBarComponent,
   TagComponent,
   TextComponent,
 } from '../../components';
@@ -21,10 +33,27 @@ import {fontFamily} from '../../constants/fontFamily';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {globalStyle} from '../../styles/GlobalStyle';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {appInfo} from '../../constants/appInfo';
 
 const HomeScreen = ({navigation}: any) => {
   const dispatch = useDispatch();
   const auth = useSelector(authSelector);
+
+  const itemEvent = {
+    title: 'International Band Music Concert',
+    imageUrl: '',
+    description:
+      'Enjoy your favorite dishe and a lovely your friends and family and have a great time. Food from local food trucks will be available for purchase.',
+    location: {
+      title: 'Gala Convention Center',
+      address: '36 Guild Street London, UK ',
+    },
+    users: [''],
+    authorId: '',
+    startAt: Date.now(),
+    endAt: Date.now(),
+    date: Date.now(),
+  };
   return (
     <View style={[globalStyle.container]}>
       <StatusBar barStyle={'light-content'} />
@@ -127,10 +156,68 @@ const HomeScreen = ({navigation}: any) => {
         <SpaceComponent height={15} />
         <CategoriesList isColor />
       </View>
-      <View style={{flex: 1}}></View>
-      {/* <ContainerComponent isScroll>
-        <TextComponent text="123" />
-      </ContainerComponent> */}
+      <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
+        <SectionComponent styles={{paddingHorizontal: 0, paddingTop: 30}}>
+          <TabBarComponent title="Upcoming Events" onPress={() => {}} />
+          <FlatList
+            showsHorizontalScrollIndicator={false}
+            horizontal
+            data={Array.from({length: 5})}
+            renderItem={({item, index}) => (
+              <EventItem key={`event${index}`} item={itemEvent} type="card" />
+            )}
+          />
+        </SectionComponent>
+        <SectionComponent>
+          <ImageBackground
+            source={require('../../assets/images/invite-image.png')}
+            style={{
+              flex: 1,
+              padding: 16,
+              minHeight: 127,
+            }}
+            imageStyle={{
+              resizeMode: 'cover',
+              borderRadius: 12,
+              backgroundColor: '#00F8FF29',
+            }}>
+            <TextComponent text="Invite your friends" title size={18} />
+            <SpaceComponent height={4} />
+            <TextComponent text="Get $20 for ticket" size={13} />
+            <RowComponent justify="flex-start">
+              <TouchableOpacity
+                style={[
+                  globalStyle.button,
+                  {
+                    marginTop: 20,
+                    backgroundColor: '#00F8FF',
+                    paddingHorizontal: 28,
+                    paddingVertical: 10,
+                    minHeight: 32,
+                  },
+                ]}>
+                <TextComponent
+                  text="INVITE"
+                  size={14}
+                  font={fontFamily.bold}
+                  color={appColors.white}
+                />
+              </TouchableOpacity>
+            </RowComponent>
+          </ImageBackground>
+        </SectionComponent>
+        <SectionComponent>
+          <TabBarComponent title="Nearby You" onPress={() => {}} />
+          <FlatList
+            showsHorizontalScrollIndicator={false}
+            horizontal
+            data={Array.from({length: 5})}
+            renderItem={({item, index}) => (
+              <EventItem key={`event${index}`} item={itemEvent} type="card" />
+            )}
+          />
+        </SectionComponent>
+      </ScrollView>
     </View>
   );
 };

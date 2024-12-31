@@ -3,6 +3,8 @@ const appColors = {
   white: '#ffffff',
   white2: '#fcfcfc',
   text: '#120D26',
+  text2: '#747688',
+  text3: '#716E9060',
   gray: '#807A7A',
   gray2: '#DADADA',
   gray3: '#E4DFDF',
@@ -10,6 +12,7 @@ const appColors = {
   gray5: '#d9d9d9',
   link: '#5669FF',
   danger: '#e74c3c',
+  danger2: '#F0635A'
 };
 
 export default appColors;
