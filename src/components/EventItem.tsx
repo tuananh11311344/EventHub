@@ -11,7 +11,8 @@ import SpaceComponent from './SpaceComponent';
 import {appInfo} from '../constants/appInfo';
 import {fontFamily} from '../constants/fontFamily';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { globalStyle } from '../styles/GlobalStyle';
+import {globalStyle} from '../styles/GlobalStyle';
+import {useNavigation} from '@react-navigation/native';
 
 interface Props {
   item: EventModel;
@@ -21,8 +22,17 @@ interface Props {
 const EventItem = (props: Props) => {
   const {item, type} = props;
 
+  const navigation: any = useNavigation();
+
   return (
-    <CardComponent styles={{width: appInfo.sizes.WIDTH * 0.7}} isShadow>
+    <CardComponent
+      styles={{width: appInfo.sizes.WIDTH * 0.7}}
+      isShadow
+      onPress={() =>
+        navigation.navigate('EventDetail', {
+          item: item,
+        })
+      }>
       <ImageBackground
         style={{flex: 1, marginBottom: 12, height: 131}}
         source={require('../assets/images/event-image.png')}
@@ -34,9 +44,7 @@ const EventItem = (props: Props) => {
         <RowComponent
           justify="space-between"
           styles={{alignItems: 'flex-start'}}>
-          <CardComponent
-            styles={[globalStyle.noSpaceCard]}
-            color="#ffffffB3">
+          <CardComponent styles={[globalStyle.noSpaceCard]} color="#ffffffB3">
             <TextComponent
               color={appColors.danger2}
               font={fontFamily.bold}
@@ -51,7 +59,7 @@ const EventItem = (props: Props) => {
             />
           </CardComponent>
           <CardComponent
-            styles={[globalStyle.noSpaceCard,{width: 35, height: 35}]}
+            styles={[globalStyle.noSpaceCard, {width: 35, height: 35}]}
             color="#ffffffB3">
             <FontAwesome name="bookmark" size={15} color={appColors.danger} />
           </CardComponent>

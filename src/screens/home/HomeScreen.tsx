@@ -65,6 +65,7 @@ const HomeScreen = ({navigation}: any) => {
           borderBottomRightRadius: 40,
           paddingTop: StatusBar.currentHeight,
           paddingHorizontal: 16,
+          marginBottom: 20
         }}>
         <RowComponent>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
@@ -157,7 +158,7 @@ const HomeScreen = ({navigation}: any) => {
         <CategoriesList isColor />
       </View>
       <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
-        <SectionComponent styles={{paddingHorizontal: 0, paddingTop: 30}}>
+        <SectionComponent styles={{paddingHorizontal: 0, paddingTop: 15}}>
           <TabBarComponent title="Upcoming Events" onPress={() => {}} />
           <FlatList
             showsHorizontalScrollIndicator={false}
