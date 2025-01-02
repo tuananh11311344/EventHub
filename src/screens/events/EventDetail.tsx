@@ -68,7 +68,7 @@ const EventDetail = ({navigation, route}: any) => {
       <SectionComponent
         styles={{
           alignItems: 'center',
-          marginTop: 244 - 130,
+          marginTop: 244 - 115,
         }}>
         <RowComponent
           styles={[

@@ -5,11 +5,14 @@ import {
   StyleSheet,
   KeyboardType,
   TouchableOpacity,
+  StyleProp,
+  ViewStyle,
 } from 'react-native';
 import React, {ReactNode, useState} from 'react';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import appColors from '../constants/appColors';
+import {globalStyle} from '../styles/GlobalStyle';
 
 interface Props {
   value: string;
@@ -21,7 +24,10 @@ interface Props {
   allowClear?: boolean;
   type?: KeyboardType;
   onEnd?: () => void;
-  errorMessage?: string; 
+  errorMessage?: string;
+  multiline?: boolean;
+  numberOfLine?: number;
+  styles?: StyleProp<ViewStyle>;
 }
 
 const InputComponent = (props: Props) => {
@@ -36,83 +42,67 @@ const InputComponent = (props: Props) => {
     type,
     onEnd,
     errorMessage,
+    multiline,
+    numberOfLine,
+    styles,
   } = props;
 
   const [isShowPass, setIsShowPass] = useState(isPassword ?? false);
 
   return (
-    <View style={styles.container}>
-      <View
+    <View
+      style={[
+        globalStyle.inputContainer,
+        {
+          borderColor: errorMessage ? appColors.danger : appColors.gray3,
+          alignItems: multiline ? 'flex-start' : 'center',
+        },
+        styles,
+      ]}>
+      {affix ?? affix}
+      <TextInput
         style={[
-          styles.inputContainer,
-          {borderColor: errorMessage ? appColors.danger : appColors.gray3},
-        ]}>
-        {affix ?? affix}
-        <TextInput
-          style={[styles.input]}
-          value={value}
-          placeholder={placeholder ?? ''}
-          onChangeText={val => onChange(val)}
-          secureTextEntry={isShowPass}
-          placeholderTextColor={'#747688'}
-          keyboardType={type ?? 'default'}
-          autoCapitalize="none"
-          onEndEditing={onEnd}
-        />
-        {suffix ?? suffix}
-        <TouchableOpacity
-          onPress={
-            isPassword ? () => setIsShowPass(!isShowPass) : () => onChange('')
-          }>
-          {isPassword ? (
-            <FontAwesome
-              name={isShowPass ? 'eye-slash' : 'eye'}
-              size={22}
-              color={appColors.gray}
-            />
-          ) : (
-            value.length > 0 &&
-            allowClear && (
-              <AntDesign name="close" size={22} color={appColors.gray} />
-            )
-          )}
-        </TouchableOpacity>
-      </View>
+          globalStyle.input,
+          {
+            paddingHorizontal: affix || suffix ? 15 : 0,
+
+            textAlignVertical: multiline ? 'top' : 'center',
+          },
+        ]}
+        multiline={multiline}
+        numberOfLines={numberOfLine}
+        value={value}
+        placeholder={placeholder ?? ''}
+        onChangeText={val => onChange(val)}
+        secureTextEntry={isShowPass}
+        placeholderTextColor={'#747688'}
+        keyboardType={type ?? 'default'}
+        autoCapitalize="none"
+        onEndEditing={onEnd}
+      />
+      {suffix ?? suffix}
+      <TouchableOpacity
+        onPress={
+          isPassword ? () => setIsShowPass(!isShowPass) : () => onChange('')
+        }>
+        {isPassword ? (
+          <FontAwesome
+            name={isShowPass ? 'eye-slash' : 'eye'}
+            size={22}
+            color={appColors.gray}
+          />
+        ) : (
+          value.length > 0 &&
+          allowClear && (
+            <AntDesign name="close" size={22} color={appColors.gray} />
+          )
+        )}
+      </TouchableOpacity>
       {errorMessage && (
-        <Text style={styles.errorMessage}>{errorMessage}</Text>
+        <Text style={globalStyle.errorMessage}>{errorMessage}</Text>
       )}
     </View>
   );
 };
 
 export default InputComponent;
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    marginBottom: 19,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    borderRadius: 12,
-    borderWidth: 1,
-    width: '100%',
-    minHeight: 56,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    backgroundColor: appColors.white,
-  },
-  input: {
-    padding: 0,
-    margin: 0,
-    flex: 1,
-    paddingHorizontal: 14,
-    color: appColors.text,
-  },
-  errorMessage: {
-    marginTop: 4,
-    color: appColors.danger,
-    fontSize: 12,
-  },
-});

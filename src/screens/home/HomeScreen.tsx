@@ -4,7 +4,7 @@ import {
   SearchNormal1,
   Sort,
 } from 'iconsax-react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   FlatList,
   ImageBackground,
@@ -13,13 +13,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useDispatch, useSelector} from 'react-redux';
 import {
-  ButtonComponent,
-  CardComponent,
   CategoriesList,
   CircleComponent,
-  ContainerComponent,
   EventItem,
   RowComponent,
   SectionComponent,
@@ -32,12 +30,57 @@ import appColors from '../../constants/appColors';
 import {fontFamily} from '../../constants/fontFamily';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {globalStyle} from '../../styles/GlobalStyle';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {appInfo} from '../../constants/appInfo';
+import Geolocation from '@react-native-community/geolocation';
+import axios from 'axios';
+import {AddressModel} from '../../models/AddressModel';
+import Geocoder from 'react-native-geocoding';
 
 const HomeScreen = ({navigation}: any) => {
+  const [currentLocation, setCurrentLocation] = useState<AddressModel>();
   const dispatch = useDispatch();
   const auth = useSelector(authSelector);
+
+  Geocoder.init(process.env.MAP_API_KEY as string);
+
+  // useEffect(() => {
+  //   // Geocoder.from('253 Hoang Hoa Tham, Hanoi')
+  //   //   .then(
+  //   //     position =>
+  //   //       position && console.log(position.results[0].geometry.location),
+  //   //   )
+  //   //   .catch(err => console.log(err));
+  //   fetch(
+  //     'https://nominatim.openstreetmap.org/search?q=253+Hoang+Hoa+Tham,+Hanoi&format=json',
+  //   )
+  //     .then(response => response.json())
+  //     .then(data => console.log(data[0].lat, data[0].lon))
+  //     .catch(err => console.log(err));
+  // }, []);
+
+  useEffect(() => {
+    Geolocation.getCurrentPosition(position => {
+      if (position.coords) {
+        reverseGeoCode({
+          lat: position.coords.latitude,
+          long: position.coords.longitude,
+        });
+      }
+    });
+  }, []);
+
+  const reverseGeoCode = async ({lat, long}: {lat: number; long: number}) => {
+    const api = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${lat},${long}&lang=en-US&apiKey=N9V72HSRPAUfVoZp3W2CS_QDRBrnfET75fMxF15V3H4`;
+
+    try {
+      const res = await axios(api);
+      if (res && res.status === 200 && res.data) {
+        const items = res.data.items;
+        setCurrentLocation(items[0]);
+      }
+    } catch (error) {
+      console.log('Error:', error);
+    }
+  };
 
   const itemEvent = {
     title: 'International Band Music Concert',
@@ -65,7 +108,7 @@ const HomeScreen = ({navigation}: any) => {
           borderBottomRightRadius: 40,
           paddingTop: StatusBar.currentHeight,
           paddingHorizontal: 16,
-          marginBottom: 20
+          marginBottom: 20,
         }}>
         <RowComponent>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
@@ -84,13 +127,15 @@ const HomeScreen = ({navigation}: any) => {
                 color={appColors.white}
               />
             </RowComponent>
-            <TextComponent
-              text="New York, USA"
-              color={appColors.white2}
-              size={13}
-              flex={0}
-              font={fontFamily.medium}
-            />
+            {currentLocation && (
+              <TextComponent
+                text={`${currentLocation.address.city}, ${currentLocation.address.countryCode}`}
+                color={appColors.white2}
+                size={13}
+                flex={0}
+                font={fontFamily.medium}
+              />
+            )}
           </View>
           <CircleComponent color="#524CE0" size={36}>
             <View>
