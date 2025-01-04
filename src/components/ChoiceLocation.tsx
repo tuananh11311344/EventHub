@@ -7,15 +7,23 @@ import RowComponent from './RowComponent';
 import SpaceComponent from './SpaceComponent';
 import TextComponent from './TextComponent';
 import {LocationModal} from '../modals';
+import {LocationModel} from '../models/LocationModel';
+import { fontFamily } from '../constants/fontFamily';
 
-const ChoiceLocation = () => {
+interface Props {
+  onSelect: (val: LocationModel) => void;
+  title?: string;
+}
+
+const ChoiceLocation = (props: Props) => {
+  const {onSelect, title} = props;
   const [isVidibleModalLocation, setIsVidibleModalLocation] = useState(false);
-  const [addressSelected, setAddressSelected] = useState<{
-    address: string;
-    position: {lat: number; long: number};
-  }>();
+  const [addressSelected, setAddressSelected] = useState<LocationModel>();
   return (
     <>
+      {title && (
+        <TextComponent text={title} size={15} font={fontFamily.medium} styles={{marginBottom: 8}} />
+      )}
       <RowComponent
         onPress={() => setIsVidibleModalLocation(!isVidibleModalLocation)}
         styles={[
@@ -41,16 +49,19 @@ const ChoiceLocation = () => {
         </View>
         <SpaceComponent width={12} />
         <TextComponent
-          text={`${addressSelected?.address ?? 'Choose location'}`}
+          text={`${addressSelected?.display_name ?? 'Choose location'}`}
           flex={1}
-          size={15}
+          size={14}
         />
-        <ArrowRight2 size={15} color={appColors.primary} />
+        <ArrowRight2 size={15} color={appColors.gray} />
       </RowComponent>
       <LocationModal
         visible={isVidibleModalLocation}
         onClose={() => setIsVidibleModalLocation(false)}
-        onSelect={location => setAddressSelected(location)}
+        onSelect={location => {
+          setAddressSelected(location);
+          onSelect(location);
+        }}
       />
     </>
   );

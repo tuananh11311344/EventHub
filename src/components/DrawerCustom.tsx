@@ -1,21 +1,5 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  StatusBar,
-  TouchableOpacity,
-  Image,
-  FlatList,
-} from 'react-native';
-import React from 'react';
-import TextComponent from './TextComponent';
-import RowComponent from './RowComponent';
-import ButtonComponent from './ButtonComponent';
-import {globalStyle} from '../styles/GlobalStyle';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import SpaceComponent from './SpaceComponent';
-import {useDispatch, useSelector} from 'react-redux';
-import {authSelector, removeAuth} from '../redux/reducers/authReducer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import {
   Bookmark2,
   Calendar,
@@ -26,10 +10,23 @@ import {
   Sms,
   User,
 } from 'iconsax-react-native';
+import React from 'react';
+import {
+  FlatList,
+  Image,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useDispatch, useSelector } from 'react-redux';
 import appColors from '../constants/appColors';
-import {fontFamily} from '../constants/fontFamily';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { authSelector, removeAuth } from '../redux/reducers/authReducer';
+import { globalStyle } from '../styles/GlobalStyle';
+import RowComponent from './RowComponent';
+import SpaceComponent from './SpaceComponent';
+import TextComponent from './TextComponent';
 
 const DrawerCustom = ({navigation}: any) => {
   const user = useSelector(authSelector);
@@ -102,7 +99,7 @@ const DrawerCustom = ({navigation}: any) => {
             style={[localStyle.avatar]}
           />
         )}
-        <TextComponent text={user.name} title size={18} />
+        <TextComponent text={user.fullname} title size={18} />
       </TouchableOpacity>
       <View style={{paddingVertical: 20, flex: 1}}>
         <FlatList

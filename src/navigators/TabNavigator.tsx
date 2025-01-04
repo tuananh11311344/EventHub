@@ -1,17 +1,12 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import {
-  AddSquare,
-  Calendar,
-  Location,
-  User
-} from 'iconsax-react-native';
-import React, { ReactNode } from 'react';
-import { Platform } from 'react-native';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {AddSquare, Calendar, Location, User} from 'iconsax-react-native';
+import React, {ReactNode} from 'react';
+import {Platform} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { CircleComponent, TextComponent } from '../components';
+import {CircleComponent, TextComponent} from '../components';
 import appColors from '../constants/appColors';
-import { AddNewScreen } from '../screens';
-import { globalStyle } from '../styles/GlobalStyle';
+import {AddNewScreen} from '../screens';
+import {globalStyle} from '../styles/GlobalStyle';
 import EventsNavigator from './EventsNavigator';
 import ExploreNavigator from './ExploreNavigator';
 import MapNavigator from './MapNavigator';
@@ -53,10 +48,7 @@ const TabNavigator = () => {
               icon = (
                 <CircleComponent
                   size={52}
-                  styles={[
-                    globalStyle.shadow,
-                    {marginTop: -50},
-                  ]}>
+                  styles={[globalStyle.shadow, {marginTop: -50}]}>
                   <AddSquare size={24} color={appColors.white} variant="Bold" />
                 </CircleComponent>
               );
@@ -83,7 +75,13 @@ const TabNavigator = () => {
       })}>
       <Tab.Screen name="Explore" component={ExploreNavigator} />
       <Tab.Screen name="Events" component={EventsNavigator} />
-      <Tab.Screen name="Add" component={AddNewScreen} />
+      <Tab.Screen
+        name="Add"
+        component={AddNewScreen}
+        options={{
+          tabBarStyle: {display: 'none'},
+        }}
+      />
       <Tab.Screen name="Map" component={MapNavigator} />
       <Tab.Screen name="Profile" component={ProfileNavigator} />
     </Tab.Navigator>

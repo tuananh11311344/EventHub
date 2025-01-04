@@ -10,7 +10,7 @@ import {
 } from '../../components';
 import appColors from '../../constants/appColors';
 import {AuthFormValues, validateAuthField} from '../../utils/authValidation';
-import authenticationAPI from '../../api/AuthApi';
+import authenticationAPI from '../../api/authApi';
 import {LoadingModal} from '../../modals';
 
 const ChangePassword = ({navigation, route}: any) => {

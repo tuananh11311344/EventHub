@@ -82,7 +82,7 @@ export const globalStyle = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 14,
     backgroundColor: appColors.white,
-    marginBottom: 19,
+
   },
   input: {
     padding: 0,

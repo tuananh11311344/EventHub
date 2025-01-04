@@ -13,7 +13,7 @@ import appColors from '../../constants/appColors';
 import {fontFamily} from '../../constants/fontFamily';
 import {ArrowRight} from 'iconsax-react-native';
 import {globalStyle} from '../../styles/GlobalStyle';
-import authenticationAPI from '../../api/AuthApi';
+import authenticationAPI from '../../api/authApi';
 import LoadingModal from '../../modals/LoadingModal';
 import {useDispatch} from 'react-redux';
 import {addAuth} from '../../redux/reducers/authReducer';

@@ -13,7 +13,7 @@ import {Lock, Sms} from 'iconsax-react-native';
 import appColors from '../../constants/appColors';
 import {fontFamily} from '../../constants/fontFamily';
 import SocialLogin from './component/SocialLogin';
-import authenticationAPI from '../../api/AuthApi';
+import authenticationAPI from '../../api/authApi';
 import {Validate} from '../../utils/validate';
 import {useDispatch} from 'react-redux';
 import {addAuth} from '../../redux/reducers/authReducer';

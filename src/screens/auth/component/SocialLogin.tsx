@@ -10,7 +10,7 @@ import appColors from '../../../constants/appColors';
 import {fontFamily} from '../../../constants/fontFamily';
 import {Facebook, Google} from '../../../assets/svgs';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import authenticationAPI from '../../../api/AuthApi';
+import authenticationAPI from '../../../api/authApi';
 import {useDispatch} from 'react-redux';
 import {addAuth} from '../../../redux/reducers/authReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';

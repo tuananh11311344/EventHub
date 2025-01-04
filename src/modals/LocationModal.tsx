@@ -28,10 +28,7 @@ import Geocoder from 'react-native-geocoding';
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSelect: (val: {
-    address: string;
-    position: {lat: number; long: number};
-  }) => void;
+  onSelect: (val: LocationModel) => void;
 }
 Geocoder.init(process.env.MAP_API_KEY as string);
 
@@ -132,7 +129,7 @@ const LocationModal = (props: Props) => {
                 <ActivityIndicator />
               ) : locations.length > 0 ? (
                 <FlatList
-                showsVerticalScrollIndicator={false}
+                  showsVerticalScrollIndicator={false}
                   data={locations}
                   renderItem={({item}) => (
                     <TouchableOpacity
@@ -158,9 +155,9 @@ const LocationModal = (props: Props) => {
           <ButtonComponent
             text="Cancel"
             type="link"
-            onPress={() => {
-              onClose;
+            onPress={() => {              
               setSearchKey('');
+              onClose();
             }}
           />
         </RowComponent>
@@ -180,12 +177,12 @@ const LocationModal = (props: Props) => {
             region={{
               latitude: currentLocation.lat,
               longitude: currentLocation.long,
-              latitudeDelta: 0.001,
-              longitudeDelta: 0.015,
+              latitudeDelta: 0.005,
+              longitudeDelta: 0.005,
             }}
             showsMyLocationButton
             showsUserLocation
-            mapType="standard"
+            mapType="hybrid"
             onRegionChange={val => console.log(val)}>
             <Marker
               coordinate={{
@@ -196,17 +193,15 @@ const LocationModal = (props: Props) => {
           </MapView>
         )}
         <ButtonComponent
-        styles={{marginTop: 20}}
+          styles={{marginTop: 20}}
           text="Confirm"
           type="primary"
           onPress={() => {
             if (currentLocation) {
               onSelect({
-                address: addressSelected,
-                position: {
-                  lat: currentLocation.lat,
-                  long: currentLocation.long,
-                },
+                display_name: addressSelected,
+                lat: currentLocation.lat,
+                long: currentLocation.long,
               });
               onClose();
             }
