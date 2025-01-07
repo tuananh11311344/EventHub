@@ -1,5 +1,6 @@
 import AvatarGroup from './AvatarGroup';
 import ButtonComponent from './ButtonComponent';
+import ButtonImagePicker from './ButtonImagePicker';
 import CardComponent from './CardComponent';
 import CategoriesList from './CategoriesList';
 import ChoiceLocation from './ChoiceLocation';
@@ -10,6 +11,7 @@ import DrawerCustom from './DrawerCustom';
 import DropdownPicker from './DropdownPicker';
 import EventItem from './EventItem';
 import InputComponent from './InputComponent';
+import MarkerCustom from './MarkerCustom';
 import RowComponent from './RowComponent';
 import SectionComponent from './SectionComponent';
 import SpaceComponent from './SpaceComponent';
@@ -35,5 +37,7 @@ export {
   AvatarGroup,
   ChoiceLocation,
   DateTimePicker,
-  DropdownPicker
+  DropdownPicker,
+  ButtonImagePicker,
+  MarkerCustom
 };

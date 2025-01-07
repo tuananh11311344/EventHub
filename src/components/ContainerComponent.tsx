@@ -21,10 +21,11 @@ interface Props {
   title?: string;
   children: ReactNode;
   back?: boolean;
+  onBack?: () => void
 }
 
 const ContainerComponent = (props: Props) => {
-  const {children, isScroll, isImageBackground, title, back} = props;
+  const {children, isScroll, isImageBackground, title, back, onBack} = props;
 
   const navigation: any = useNavigation();
 
@@ -42,7 +43,10 @@ const ContainerComponent = (props: Props) => {
             }}>
             {back && (
               <TouchableOpacity
-                onPress={() => navigation.goBack()}
+                onPress={() => {
+                  navigation.goBack()
+                  onBack && onBack()
+                }}
                 style={{marginRight: 12}}>
                 <ArrowLeft size={24} color={appColors.text} />
               </TouchableOpacity>

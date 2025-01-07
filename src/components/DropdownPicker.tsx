@@ -29,14 +29,16 @@ interface Props {
   selected?: string | string[];
   onSelect: (val: string | string[]) => void;
   multiple?: boolean;
+  errorMessage?: string;
 }
 
 const DropdownPicker = (props: Props) => {
-  const {label, values, selected, onSelect, multiple} = props;
+  const {label, values, selected, onSelect, multiple, errorMessage} = props;
   const [isVisibleModalize, setIsVisibleModalize] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string[]>([]);
   const [searchKey, setSearchKey] = useState('');
   const modalizeRef = useRef<Modalize>();
+  const [result, setResult] = useState<SelectModel[]>([]);
 
   useEffect(() => {
     if (isVisibleModalize) {
@@ -47,10 +49,26 @@ const DropdownPicker = (props: Props) => {
   }, [isVisibleModalize]);
 
   useEffect(() => {
+    if (!searchKey) {
+      setResult([]);
+    } else {
+      const data = values.filter(element =>
+        element.label.toLowerCase().includes(searchKey.toLowerCase()),
+      );
+      setResult(data);
+    }
+  }, [searchKey]);
+
+  useEffect(() => {
     if (isVisibleModalize && selected && selected?.length > 0 && multiple) {
       setSelectedItem(selected as string[]);
     }
   }, [isVisibleModalize, selected]);
+
+  const handleCloseModal = () => {
+    setSearchKey('');
+    modalizeRef.current?.close();
+  };
 
   const handleSelectItem = (id: string) => {
     if (selectedItem.includes(id)) {
@@ -98,7 +116,10 @@ const DropdownPicker = (props: Props) => {
         onPress={
           multiple
             ? () => handleSelectItem(item.value)
-            : () => onSelect(item.value)
+            : () => {
+                onSelect(item.value);
+                handleCloseModal();
+              }
         }
         key={item.value}
         styles={localStyle.listItem}>
@@ -135,20 +156,33 @@ const DropdownPicker = (props: Props) => {
         styles={[
           globalStyle.inputContainer,
           {
-            borderColor: appColors.gray2,
+            borderColor: errorMessage ? appColors.danger : appColors.gray2,
             marginTop: label ? 8 : 0,
+            alignItems: 'flex-start',
           },
         ]}
         onPress={() => setIsVisibleModalize(true)}>
         <RowComponent styles={{flex: 1, flexWrap: 'wrap'}}>
-          {selectedItem.length > 0 ? (
-            selectedItem.map(element => renderSelectedItem(element))
+          {selected ? (
+            selectedItem.length > 0 ? (
+              selectedItem.map(element => renderSelectedItem(element))
+            ) : (
+              <TextComponent
+                text={
+                  values.find(element => element.value === selected)?.label ??
+                  ''
+                }
+              />
+            )
           ) : (
             <TextComponent text="Select" />
           )}
         </RowComponent>
         <ArrowDown2 size={18} color={appColors.gray} />
       </RowComponent>
+      {errorMessage && (
+        <Text style={globalStyle.errorMessage}>{errorMessage}</Text>
+      )}
       <Portal>
         <Modalize
           handlePosition="inside"
@@ -187,15 +221,14 @@ const DropdownPicker = (props: Props) => {
               <ButtonComponent
                 type="link"
                 text="Cancel"
-                onPress={() => {
-                  setSearchKey('');
-                  modalizeRef.current?.close();
-                }}
+                onPress={handleCloseModal}
               />
             </RowComponent>
           }>
           <View style={{paddingHorizontal: 20, paddingVertical: 30}}>
-            {values && values.map(item => renderSelectItem(item))}
+            {result.length > 0
+              ? result.map(item => renderSelectItem(item))
+              : values && values.map(item => renderSelectItem(item))}
           </View>
         </Modalize>
       </Portal>
@@ -210,13 +243,14 @@ const localStyle = StyleSheet.create({
     marginBottom: 15,
   },
   selectedItem: {
-    borderWidth: 0.5,
-    borderColor: appColors.gray,
+    borderWidth: 1,
+    borderColor: appColors.gray3,
+
     padding: 4,
     marginBottom: 8,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 10,
     minWidth: 250,
   },
 });

@@ -1,6 +1,6 @@
 import {ArrowRight2, Location} from 'iconsax-react-native';
 import React, {useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 import appColors from '../constants/appColors';
 import {globalStyle} from '../styles/GlobalStyle';
 import RowComponent from './RowComponent';
@@ -8,28 +8,34 @@ import SpaceComponent from './SpaceComponent';
 import TextComponent from './TextComponent';
 import {LocationModal} from '../modals';
 import {LocationModel} from '../models/LocationModel';
-import { fontFamily } from '../constants/fontFamily';
+import {fontFamily} from '../constants/fontFamily';
 
 interface Props {
   onSelect: (val: LocationModel) => void;
   title?: string;
+  errorMessage?: string;
 }
 
 const ChoiceLocation = (props: Props) => {
-  const {onSelect, title} = props;
+  const {onSelect, title, errorMessage} = props;
   const [isVidibleModalLocation, setIsVidibleModalLocation] = useState(false);
   const [addressSelected, setAddressSelected] = useState<LocationModel>();
   return (
     <>
       {title && (
-        <TextComponent text={title} size={15} font={fontFamily.medium} styles={{marginBottom: 8}} />
+        <TextComponent
+          text={title}
+          size={15}
+          font={fontFamily.medium}
+          styles={{marginBottom: 8}}
+        />
       )}
       <RowComponent
         onPress={() => setIsVidibleModalLocation(!isVidibleModalLocation)}
         styles={[
           globalStyle.inputContainer,
           {
-            borderColor: appColors.gray3,
+            borderColor: errorMessage ? appColors.danger : appColors.gray3,
             paddingHorizontal: 10,
             paddingVertical: 10,
           },
@@ -55,6 +61,7 @@ const ChoiceLocation = (props: Props) => {
         />
         <ArrowRight2 size={15} color={appColors.gray} />
       </RowComponent>
+
       <LocationModal
         visible={isVidibleModalLocation}
         onClose={() => setIsVidibleModalLocation(false)}
@@ -63,6 +70,9 @@ const ChoiceLocation = (props: Props) => {
           onSelect(location);
         }}
       />
+      {errorMessage && (
+        <Text style={globalStyle.errorMessage}>{errorMessage}</Text>
+      )}
     </>
   );
 };

@@ -1,12 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import Geolocation from '@react-native-community/geolocation';
+import axios from 'axios';
+import { SearchNormal1 } from 'iconsax-react-native';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Modal,
-  StyleSheet,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
+import Geocoder from 'react-native-geocoding';
+import MapView, { Marker } from 'react-native-maps';
 import {
   ButtonComponent,
   InputComponent,
@@ -14,16 +18,9 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../components';
-import {SearchNormal1} from 'iconsax-react-native';
 import appColors from '../constants/appColors';
-import axios from 'axios';
-import {LocationModel} from '../models/LocationModel';
-import {DOMParser} from 'xmldom';
-import MapView, {Marker} from 'react-native-maps';
-import {appInfo} from '../constants/appInfo';
-import {AddressModel} from '../models/AddressModel';
-import Geolocation from '@react-native-community/geolocation';
-import Geocoder from 'react-native-geocoding';
+import { appInfo } from '../constants/appInfo';
+import { LocationModel } from '../models/LocationModel';
 
 interface Props {
   visible: boolean;
@@ -37,24 +34,29 @@ const LocationModal = (props: Props) => {
   const [searchKey, setSearchKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [locations, setLocations] = useState<LocationModel[]>([]);
-  const [addressSelected, setAddressSelected] = useState('');
+  const [locationAddress, setLocationAddress] = useState('');
   const [currentLocation, setCurrentLocation] = useState<LocationModel>();
 
   useEffect(() => {
     Geolocation.getCurrentPosition(position => {
+
       if (position.coords) {
         setCurrentLocation({
           lat: position.coords.latitude,
           long: position.coords.longitude,
+        });
+        handleGetAddressFromPosition({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
         });
       }
     });
   }, []);
 
   useEffect(() => {
-    if (addressSelected) {
+    if (locationAddress) {
       fetch(
-        `https://nominatim.openstreetmap.org/search?q=${addressSelected}&limit=1&format=json`,
+        `https://nominatim.openstreetmap.org/search?q=${locationAddress}&limit=1&format=json`,
       )
         .then(response => response.json())
         .then(data => {
@@ -67,13 +69,39 @@ const LocationModal = (props: Props) => {
         })
         .catch(err => console.log(err));
     }
-  }, [addressSelected]);
+  }, [locationAddress]);
 
   useEffect(() => {
     if (!searchKey) {
       setLocations([]);
     }
   }, [searchKey]);
+
+  const handleGetAddressFromPosition = async ({
+    latitude,
+    longitude,
+  }: {
+    latitude: number;
+    longitude: number;
+  }) => {
+    try {
+      const api = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`;
+      const response = await axios.get(api);
+
+      if (response.data && response.data.address) {
+        const address = response.data.display_name;
+        setLocationAddress(address); 
+        setCurrentLocation({
+          lat: latitude,
+          long: longitude,
+        });
+      } else {
+        console.log('No address found for the given coordinates.');
+      } 
+    } catch (error) {
+      console.error('Error fetching address:', error);
+    }
+  };
 
   const handleSearchLocation = async () => {
     // const api = `https://autocomplete.search.hereapi.com/v1/autocomplete?q=${searchKey}&limit=10&apiKey=N9V72HSRPAUfVoZp3W2CS_QDRBrnfET75fMxF15V3H4`;
@@ -88,7 +116,6 @@ const LocationModal = (props: Props) => {
           display_name: item.display_name,
           lat: parseFloat(item.lat),
           long: parseFloat(item.lon),
-          name: item.name || '',
         }));
         setLocations(locationsData);
       }
@@ -135,7 +162,7 @@ const LocationModal = (props: Props) => {
                     <TouchableOpacity
                       style={{marginBottom: 15}}
                       onPress={() => {
-                        setAddressSelected(item.display_name ?? '');
+                        setLocationAddress(item.display_name ?? '');
                         setSearchKey('');
                       }}>
                       <TextComponent text={item.display_name ?? ''} />
@@ -155,7 +182,7 @@ const LocationModal = (props: Props) => {
           <ButtonComponent
             text="Cancel"
             type="link"
-            onPress={() => {              
+            onPress={() => {
               setSearchKey('');
               onClose();
             }}
@@ -182,8 +209,10 @@ const LocationModal = (props: Props) => {
             }}
             showsMyLocationButton
             showsUserLocation
-            mapType="hybrid"
-            onRegionChange={val => console.log(val)}>
+            mapType="terrain"
+            onPress={val =>
+              handleGetAddressFromPosition(val.nativeEvent.coordinate)
+            }>
             <Marker
               coordinate={{
                 latitude: currentLocation.lat,
@@ -199,7 +228,7 @@ const LocationModal = (props: Props) => {
           onPress={() => {
             if (currentLocation) {
               onSelect({
-                display_name: addressSelected,
+                display_name: locationAddress,
                 lat: currentLocation.lat,
                 long: currentLocation.long,
               });

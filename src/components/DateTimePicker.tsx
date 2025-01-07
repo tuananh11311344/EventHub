@@ -4,14 +4,14 @@ import {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 import RowComponent from './RowComponent';
 import {globalStyle} from '../styles/GlobalStyle';
 import appColors from '../constants/appColors';
-import {ArrowDown2, Calendar, Clock, Timer1} from 'iconsax-react-native';
+import {ArrowDown2, Calendar, Clock} from 'iconsax-react-native';
 import TextComponent from './TextComponent';
 import {fontFamily} from '../constants/fontFamily';
 
 interface Props {
   type: 'date' | 'time';
-  selected?: Date;
-  onSelect: (val: Date) => void;
+  selected?: number; // Sử dụng số timestamp thay vì Date
+  onSelect: (val: number) => void; // Trả về số timestamp
   title?: string;
 }
 
@@ -19,22 +19,26 @@ const DateTimePicker = (props: Props) => {
   const {type, selected, onSelect, title} = props;
 
   const showCalendar = () => {
+    // Chuyển timestamp (number) thành Date để sử dụng trong picker
     DateTimePickerAndroid.open({
       mode: type ?? 'date',
-      value: selected ?? new Date(),
-      onChange: (_, date?: Date) => onSelect(date || new Date()),
+      value: selected ? new Date(selected) : new Date(),
+      onChange: (_, date?: Date) => {
+        if (date) {
+          onSelect(date.getTime()); // Trả về timestamp (number)
+        }
+      },
     });
   };
 
-  const valueSelect = (type?: 'date' | 'time', selected?: Date): string => {
+  const valueSelect = (type?: 'date' | 'time', selected?: number): string => {
     if (!selected) return '';
+    const date = new Date(selected); // Chuyển timestamp thành Date để hiển thị
     switch (type) {
       case 'date':
-        return `${selected.getDate()}/${
-          selected.getMonth() + 1
-        }/${selected.getFullYear()}`;
+        return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
       case 'time':
-        return `${selected.getHours()}:${selected.getMinutes()}`;
+        return `${date.getHours()}:${date.getMinutes()}`;
       default:
         return '';
     }
@@ -58,7 +62,7 @@ const DateTimePicker = (props: Props) => {
           ]}>
           <TextComponent
             flex={1}
-            styles={{textAlign:'center'}}
+            styles={{textAlign: 'center'}}
             text={selected ? valueSelect(type, selected) : ''}
             color={selected ? appColors.text : '#676767'}
           />

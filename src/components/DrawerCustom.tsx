@@ -30,6 +30,7 @@ import TextComponent from './TextComponent';
 
 const DrawerCustom = ({navigation}: any) => {
   const user = useSelector(authSelector);
+  
   const dispatch = useDispatch();
   const size = 20;
   const color = appColors.gray;
@@ -91,8 +92,8 @@ const DrawerCustom = ({navigation}: any) => {
             screen: 'ProfileScreen',
           });
         }}>
-        {user.photo ? (
-          <Image source={{uri: user.photo}} style={[localStyle.avatar]} />
+        {user.photoUrl ? (
+          <Image source={{uri: user.photoUrl}} style={[localStyle.avatar]} />
         ) : (
           <Image
             source={require('../assets/images/user.png')}

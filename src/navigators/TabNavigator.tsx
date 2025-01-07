@@ -82,7 +82,13 @@ const TabNavigator = () => {
           tabBarStyle: {display: 'none'},
         }}
       />
-      <Tab.Screen name="Map" component={MapNavigator} />
+      <Tab.Screen
+        name="Map"
+        component={MapNavigator}
+        options={{
+          tabBarStyle: {display: 'none'},
+        }}
+      />
       <Tab.Screen name="Profile" component={ProfileNavigator} />
     </Tab.Navigator>
   );

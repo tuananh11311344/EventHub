@@ -161,7 +161,7 @@ const EventDetail = ({navigation, route}: any) => {
                 justifyContent: 'space-around',
               }}>
               <TextComponent
-                text={item.location.title}
+                text={item.titleAddress}
                 font={fontFamily.medium}
                 size={16}
               />

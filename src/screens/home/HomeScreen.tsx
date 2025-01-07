@@ -74,7 +74,7 @@ const HomeScreen = ({navigation}: any) => {
     try {
       const res = await axios(api);
       if (res && res.status === 200 && res.data) {
-        const items = res.data.items;
+        const items = res.data.items;        
         setCurrentLocation(items[0]);
       }
     } catch (error) {
@@ -84,18 +84,22 @@ const HomeScreen = ({navigation}: any) => {
 
   const itemEvent = {
     title: 'International Band Music Concert',
-    imageUrl: '',
+    photoUrl: '',
     description:
       'Enjoy your favorite dishe and a lovely your friends and family and have a great time. Food from local food trucks will be available for purchase.',
     location: {
-      title: 'Gala Convention Center',
-      address: '36 Guild Street London, UK ',
+      address: '36 Guild Street London, UK',
+      lat: 51.5074,
+      long: -0.1278,
     },
-    users: [''],
+    titleAddress: 'Gala Convention Center',
+    users: [],
     authorId: '',
-    startAt: Date.now(),
-    endAt: Date.now(),
-    date: Date.now(),
+    startAt: 0,
+    endAt: 0,
+    date: 0,
+    category: 'sports',
+    price: '120',
   };
   return (
     <View style={[globalStyle.container]}>
