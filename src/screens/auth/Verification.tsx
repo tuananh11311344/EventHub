@@ -84,7 +84,6 @@ const Verification = ({navigation, route}: any) => {
         'Time out verification code, plase resend new verification code',
       );
     } else {
-      
       if (Number(codeValue) === Number(currentCode)) {
         switch (type) {
           case 'register':
@@ -100,9 +99,12 @@ const Verification = ({navigation, route}: any) => {
                 data,
                 'post',
               );
-              dispatch(addAuth(res.data));
+              if (res) {
+                navigation.navigate('LoginScreen');
+              }
+              // dispatch(addAuth(res.data));
 
-              await AsyncStorage.setItem('auth', JSON.stringify(res.data));
+              // await AsyncStorage.setItem('auth', JSON.stringify(res.data));
             } catch (error) {
               setErrorMessage('User has already exist!!!');
               console.log('Can not create new user ', error);

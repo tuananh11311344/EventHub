@@ -12,6 +12,7 @@ export interface EventModel {
   endAt: number;
   date: number;
   price: string;
+  followers?: string[];
 }
 
   

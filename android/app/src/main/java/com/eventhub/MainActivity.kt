@@ -1,4 +1,4 @@
-package com.projecteventhub
+package com.projecteventhub2
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

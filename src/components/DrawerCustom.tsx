@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {
   Bookmark2,
   Calendar,
@@ -10,26 +10,34 @@ import {
   Sms,
   User,
 } from 'iconsax-react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {
   FlatList,
   Image,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import appColors from '../constants/appColors';
-import { authSelector, removeAuth } from '../redux/reducers/authReducer';
-import { globalStyle } from '../styles/GlobalStyle';
+import {
+  authSelector,
+  AuthState,
+  removeAuth,
+} from '../redux/reducers/authReducer';
+import {globalStyle} from '../styles/GlobalStyle';
 import RowComponent from './RowComponent';
 import SpaceComponent from './SpaceComponent';
 import TextComponent from './TextComponent';
+import {HandleNotification} from '../utils/handleNotification';
+import {LoadingModal} from '../modals';
 
 const DrawerCustom = ({navigation}: any) => {
-  const user = useSelector(authSelector);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const auth: AuthState = useSelector(authSelector);
   
   const dispatch = useDispatch();
   const size = 20;
@@ -78,64 +86,80 @@ const DrawerCustom = ({navigation}: any) => {
   ];
 
   const handleSignOut = async () => {
+    setIsLoading(true);
+    const fcmToken = await AsyncStorage.getItem('fcmToken');
+    if (fcmToken) {
+      if (auth.fcmTokens && auth.fcmTokens.length > 0) {
+        const items = [...auth.fcmTokens];
+        const index = auth.fcmTokens.findIndex(e => e === fcmToken);
+
+        if (index !== -1) {
+          items.splice(index, 1);
+        }
+        await HandleNotification.update(auth.id, items);
+      }
+    }
     await GoogleSignin.signOut();
     await AsyncStorage.clear();
     dispatch(removeAuth());
+    setIsLoading(false);
   };
 
   return (
-    <View style={[localStyle.container]}>
-      <TouchableOpacity
-        onPress={() => {
-          navigation.closeDrawer();
-          navigation.navigate('Profile', {
-            screen: 'ProfileScreen',
-          });
-        }}>
-        {user.photoUrl ? (
-          <Image source={{uri: user.photoUrl}} style={[localStyle.avatar]} />
-        ) : (
-          <Image
-            source={require('../assets/images/user.png')}
-            style={[localStyle.avatar]}
-          />
-        )}
-        <TextComponent text={user.fullname} title size={18} />
-      </TouchableOpacity>
-      <View style={{paddingVertical: 20, flex: 1}}>
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={profileMenu}
-          style={{flex: 1, marginVertical: 20}}
-          renderItem={({item, index}) => (
-            <RowComponent
-              styles={[localStyle.listItem]}
-              onPress={
-                item.key === 'SignOut'
-                  ? () => handleSignOut()
-                  : () => {
-                      console.log(item.key);
-                      navigation.closeDrawer();
-                    }
-              }>
-              {item.icon}
-              <TextComponent
-                text={item.title}
-                styles={[localStyle.listItemText]}
-              />
-            </RowComponent>
-          )}
-        />
-      </View>
-      <RowComponent justify="flex-start">
+    <>
+      <View style={[localStyle.container]}>
         <TouchableOpacity
-          style={[globalStyle.button, {backgroundColor: '#00F8FF33'}]}>
-          <MaterialCommunityIcons name="crown" size={22} color="#00F8FF" />
-          <SpaceComponent width={8} />
-          <TextComponent text="Upgrade Pro" color="#00F8FF" />
+          onPress={() => {
+            navigation.closeDrawer();
+            navigation.navigate('Profile', {
+              screen: 'ProfileScreen',
+            });
+          }}>
+          {auth.photoUrl ? (
+            <Image source={{uri: auth.photoUrl}} style={[localStyle.avatar]} />
+          ) : (
+            <Image
+              source={require('../assets/images/user.png')}
+              style={[localStyle.avatar]}
+            />
+          )}
+          <TextComponent text={auth.fullname} title size={18} />
         </TouchableOpacity>
-      </RowComponent>
-    </View>
+        <View style={{paddingVertical: 20, flex: 1}}>
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            data={profileMenu}
+            style={{flex: 1, marginVertical: 20}}
+            renderItem={({item, index}) => (
+              <RowComponent
+                styles={[localStyle.listItem]}
+                onPress={
+                  item.key === 'SignOut'
+                    ? () => handleSignOut()
+                    : () => {
+                        navigation.closeDrawer();
+                      }
+                }>
+                {item.icon}
+                <TextComponent
+                  text={item.title}
+                  styles={[localStyle.listItemText]}
+                />
+              </RowComponent>
+            )}
+          />
+        </View>
+        <RowComponent justify="flex-start">
+          <TouchableOpacity
+            style={[globalStyle.button, {backgroundColor: '#00F8FF33'}]}>
+            <MaterialCommunityIcons name="crown" size={22} color="#00F8FF" />
+            <SpaceComponent width={8} />
+            <TextComponent text="Upgrade Pro" color="#00F8FF" />
+          </TouchableOpacity>
+        </RowComponent>
+      </View>
+      <LoadingModal visible={isLoading} />
+    </>
   );
 };
 

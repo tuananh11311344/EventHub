@@ -14,11 +14,10 @@ import authenticationAPI from '../../../api/authApi';
 import {useDispatch} from 'react-redux';
 import {addAuth} from '../../../redux/reducers/authReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LoadingModal } from '../../../modals';
+import {LoadingModal} from '../../../modals';
 
 GoogleSignin.configure({
-  webClientId:
-    '741364031381-4i57gco62u8kphgs89b5rsi4ru5hpjap.apps.googleusercontent.com',
+  webClientId: process.env.WEB_CLIENT_KEY,
 });
 
 const SocialLogin = () => {
@@ -38,7 +37,13 @@ const SocialLogin = () => {
 
       const res = await authenticationAPI.HandleAuthentication(
         api,
-        user,
+        {
+          fullname: user?.name,
+          photoUrl: user?.photo,
+          givenName: user?.givenName,
+          familyName: user?.familyName,
+          email: user?.email,
+        },
         'post',
       );
 
@@ -49,6 +54,7 @@ const SocialLogin = () => {
       setIsLoading(false);
       console.log('Sign in with google error: ', error);
     }
+    setIsLoading(false);
   };
   return (
     <>

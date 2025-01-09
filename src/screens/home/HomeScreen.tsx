@@ -1,3 +1,5 @@
+import Geolocation from '@react-native-community/geolocation';
+import axios from 'axios';
 import {
   HambergerMenu,
   Notification,
@@ -10,15 +12,18 @@ import {
   ImageBackground,
   ScrollView,
   StatusBar,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useDispatch, useSelector} from 'react-redux';
+import eventAPI from '../../api/eventApi';
 import {
   CategoriesList,
   CircleComponent,
   EventItem,
+  LoadingComponent,
   RowComponent,
   SectionComponent,
   SpaceComponent,
@@ -28,36 +33,24 @@ import {
 } from '../../components';
 import appColors from '../../constants/appColors';
 import {fontFamily} from '../../constants/fontFamily';
+import {AddressModel} from '../../models/AddressModel';
+import {EventModel} from '../../models/EventModel';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {globalStyle} from '../../styles/GlobalStyle';
-import Geolocation from '@react-native-community/geolocation';
-import axios from 'axios';
-import {AddressModel} from '../../models/AddressModel';
-import Geocoder from 'react-native-geocoding';
+import messaging, {
+  FirebaseMessagingTypes,
+} from '@react-native-firebase/messaging';
 
 const HomeScreen = ({navigation}: any) => {
-  const [currentLocation, setCurrentLocation] = useState<AddressModel>();
   const dispatch = useDispatch();
   const auth = useSelector(authSelector);
-
-  Geocoder.init(process.env.MAP_API_KEY as string);
-
-  // useEffect(() => {
-  //   // Geocoder.from('253 Hoang Hoa Tham, Hanoi')
-  //   //   .then(
-  //   //     position =>
-  //   //       position && console.log(position.results[0].geometry.location),
-  //   //   )
-  //   //   .catch(err => console.log(err));
-  //   fetch(
-  //     'https://nominatim.openstreetmap.org/search?q=253+Hoang+Hoa+Tham,+Hanoi&format=json',
-  //   )
-  //     .then(response => response.json())
-  //     .then(data => console.log(data[0].lat, data[0].lon))
-  //     .catch(err => console.log(err));
-  // }, []);
-
+  const [currentLocation, setCurrentLocation] = useState<AddressModel>();
+  const [eventsUpcoming, setEventsUpcoming] = useState<EventModel[]>([]);
+  const [eventsNearby, setEventsNearby] = useState<EventModel[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
   useEffect(() => {
+    setIsLoading(true);
     Geolocation.getCurrentPosition(position => {
       if (position.coords) {
         reverseGeoCode({
@@ -66,7 +59,20 @@ const HomeScreen = ({navigation}: any) => {
         });
       }
     });
+    getEvents('upcoming');
+    messaging().onMessage(
+      async (mess: FirebaseMessagingTypes.RemoteMessage) => {
+        ToastAndroid.show(mess.notification?.title ?? '', ToastAndroid.SHORT);
+      },
+    );
   }, []);
+
+  useEffect(() => {
+    if (currentLocation) {
+      getEvents('nearby');
+      setIsLoading(false);
+    }
+  }, [currentLocation]);
 
   const reverseGeoCode = async ({lat, long}: {lat: number; long: number}) => {
     const api = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${lat},${long}&lang=en-US&apiKey=N9V72HSRPAUfVoZp3W2CS_QDRBrnfET75fMxF15V3H4`;
@@ -74,32 +80,41 @@ const HomeScreen = ({navigation}: any) => {
     try {
       const res = await axios(api);
       if (res && res.status === 200 && res.data) {
-        const items = res.data.items;        
+        const items = res.data.items;
         setCurrentLocation(items[0]);
       }
     } catch (error) {
+      setIsLoading(false);
       console.log('Error:', error);
     }
   };
+  const getEvents = async (type: string) => {
+    var api = '';
 
-  const itemEvent = {
-    title: 'International Band Music Concert',
-    photoUrl: '',
-    description:
-      'Enjoy your favorite dishe and a lovely your friends and family and have a great time. Food from local food trucks will be available for purchase.',
-    location: {
-      address: '36 Guild Street London, UK',
-      lat: 51.5074,
-      long: -0.1278,
-    },
-    titleAddress: 'Gala Convention Center',
-    users: [],
-    authorId: '',
-    startAt: 0,
-    endAt: 0,
-    date: 0,
-    category: 'sports',
-    price: '120',
+    switch (type) {
+      case 'upcoming':
+        api = `/get-events?limit=5&date=${new Date().getTime()}`;
+        try {
+          const res = await eventAPI.HandleEvent(api);
+          setEventsUpcoming(res.data);
+        } catch (error) {
+          setIsLoading(false);
+          console.log('Get events upcoming error:', error);
+        }
+        break;
+      case 'nearby':
+        api = `/get-events?limit=5&lat=${currentLocation?.position.lat}&long=${currentLocation?.position.lng}&distance=5`;
+        try {
+          const res = await eventAPI.HandleEvent(api);
+          setEventsNearby(res.data);
+        } catch (error) {
+          setIsLoading(false);
+          console.log('Get events nearby error:', error);
+        }
+        break;
+      default:
+        break;
+    }
   };
   return (
     <View style={[globalStyle.container]}>
@@ -209,14 +224,21 @@ const HomeScreen = ({navigation}: any) => {
       <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
         <SectionComponent styles={{paddingHorizontal: 0, paddingTop: 15}}>
           <TabBarComponent title="Upcoming Events" onPress={() => {}} />
-          <FlatList
-            showsHorizontalScrollIndicator={false}
-            horizontal
-            data={Array.from({length: 5})}
-            renderItem={({item, index}) => (
-              <EventItem key={`event${index}`} item={itemEvent} type="card" />
-            )}
-          />
+          {eventsUpcoming && eventsUpcoming.length > 0 ? (
+            <FlatList
+              showsHorizontalScrollIndicator={false}
+              horizontal
+              data={eventsUpcoming}
+              renderItem={({item, index}) => (
+                <EventItem key={`event${index}`} item={item} type="card" />
+              )}
+            />
+          ) : (
+            <LoadingComponent
+              isLoading={isLoading}
+              values={eventsUpcoming.length}
+            />
+          )}
         </SectionComponent>
         <SectionComponent>
           <ImageBackground
@@ -256,16 +278,23 @@ const HomeScreen = ({navigation}: any) => {
             </RowComponent>
           </ImageBackground>
         </SectionComponent>
-        <SectionComponent>
+        <SectionComponent styles={{paddingHorizontal: 0}}>
           <TabBarComponent title="Nearby You" onPress={() => {}} />
-          <FlatList
-            showsHorizontalScrollIndicator={false}
-            horizontal
-            data={Array.from({length: 5})}
-            renderItem={({item, index}) => (
-              <EventItem key={`event${index}`} item={itemEvent} type="card" />
-            )}
-          />
+          {eventsNearby && eventsNearby.length > 0 ? (
+            <FlatList
+              showsHorizontalScrollIndicator={false}
+              horizontal
+              data={eventsNearby}
+              renderItem={({item, index}) => (
+                <EventItem key={`event${index}`} item={item} type="card" />
+              )}
+            />
+          ) : (
+            <LoadingComponent
+              isLoading={isLoading}
+              values={eventsNearby.length}
+            />
+          )}
         </SectionComponent>
       </ScrollView>
     </View>

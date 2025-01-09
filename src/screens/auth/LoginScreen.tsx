@@ -19,6 +19,7 @@ import {useDispatch} from 'react-redux';
 import {addAuth} from '../../redux/reducers/authReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AuthFormValues, validateAuthField} from '../../utils/authValidation';
+import {LoadingModal} from '../../modals';
 
 const LoginScreen = ({navigation}: any) => {
   const [email, setEmail] = useState('');
@@ -27,7 +28,7 @@ const LoginScreen = ({navigation}: any) => {
   const [errorMessage, setErrorMessage] = useState<any>();
   const dispatch = useDispatch();
   const [isDisable, setIsDisable] = useState(true);
-
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (
@@ -42,8 +43,6 @@ const LoginScreen = ({navigation}: any) => {
     }
   }, [errorMessage, email, password]);
 
-
-
   const formValidator = (key: string, values: AuthFormValues) => {
     const data = {...errorMessage};
     data[key] = validateAuthField(key, values);
@@ -51,6 +50,7 @@ const LoginScreen = ({navigation}: any) => {
   };
 
   const handleLogin = async () => {
+    setIsLoading(true);
     try {
       const res = await authenticationAPI.HandleAuthentication(
         '/login',
@@ -58,9 +58,6 @@ const LoginScreen = ({navigation}: any) => {
         'post',
       );
 
-      console.log(res.data);
-      
-      
       dispatch(addAuth(res.data));
       await AsyncStorage.setItem(
         'auth',
@@ -68,82 +65,87 @@ const LoginScreen = ({navigation}: any) => {
           ? JSON.stringify(res.data)
           : JSON.stringify({email, accessToken: res.data.accessToken}),
       );
+      setIsLoading(false);
     } catch (error) {
       console.log(error);
+      setIsLoading(false);
     }
   };
   return (
-    <ContainerComponent isImageBackground isScroll>
-      <SectionComponent
-        styles={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: 75,
-        }}>
-        <Image
-          source={require('../../assets/images/text-logo.png')}
-          style={{width: 162, height: 114}}
-        />
-      </SectionComponent>
-      <SectionComponent>
-        <TextComponent title size={24} text="Sign in" />
-        <SpaceComponent height={21} />
-        <InputComponent
-          value={email}
-          onChange={val => setEmail(val)}
-          placeholder="abc@gmail.com"
-          affix={<Sms size={22} color={appColors.gray} />}
-          allowClear
-          onEnd={() => formValidator('email', {email: email})}
-          errorMessage={errorMessage?.email}
-        />
-        <InputComponent
-          value={password}
-          onChange={val => setPassword(val)}
-          isPassword
-          placeholder="Your password"
-          affix={<Lock size={22} color={appColors.gray} />}
-          onEnd={() => formValidator('password', {password: password})}
-          errorMessage={errorMessage?.password}
-        />
-        <RowComponent justify="space-between">
-          <RowComponent>
-            <Switch
-              trackColor={{true: appColors.primary}}
-              thumbColor={appColors.white}
-              value={isRemember}
-              onChange={() => setIsRemember(!isRemember)}
+    <>
+      <ContainerComponent isImageBackground isScroll>
+        <SectionComponent
+          styles={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 75,
+          }}>
+          <Image
+            source={require('../../assets/images/text-logo.png')}
+            style={{width: 162, height: 114}}
+          />
+        </SectionComponent>
+        <SectionComponent>
+          <TextComponent title size={24} text="Sign in" />
+          <SpaceComponent height={21} />
+          <InputComponent
+            value={email}
+            onChange={val => setEmail(val)}
+            placeholder="abc@gmail.com"
+            affix={<Sms size={22} color={appColors.gray} />}
+            allowClear
+            onEnd={() => formValidator('email', {email: email})}
+            errorMessage={errorMessage?.email}
+          />
+          <InputComponent
+            value={password}
+            onChange={val => setPassword(val)}
+            isPassword
+            placeholder="Your password"
+            affix={<Lock size={22} color={appColors.gray} />}
+            onEnd={() => formValidator('password', {password: password})}
+            errorMessage={errorMessage?.password}
+          />
+          <RowComponent justify="space-between">
+            <RowComponent>
+              <Switch
+                trackColor={{true: appColors.primary}}
+                thumbColor={appColors.white}
+                value={isRemember}
+                onChange={() => setIsRemember(!isRemember)}
+              />
+              <TextComponent text="Remember Me" />
+            </RowComponent>
+            <ButtonComponent
+              text="Forgot Password?"
+              type="text"
+              onPress={() => navigation.navigate('ForgotPassword')}
             />
-            <TextComponent text="Remember Me" />
           </RowComponent>
+        </SectionComponent>
+        <SpaceComponent height={16} />
+        <SectionComponent>
           <ButtonComponent
-            text="Forgot Password?"
-            type="text"
-            onPress={() => navigation.navigate('ForgotPassword')}
+            disable={isDisable}
+            text="SIGN IN"
+            type="primary"
+            onPress={handleLogin}
           />
-        </RowComponent>
-      </SectionComponent>
-      <SpaceComponent height={16} />
-      <SectionComponent>
-        <ButtonComponent
-          disable={isDisable}
-          text="SIGN IN"
-          type="primary"
-          onPress={handleLogin}
-        />
-      </SectionComponent>
-      <SocialLogin />
-      <SectionComponent>
-        <RowComponent>
-          <TextComponent text="Don’t have an account? " />
-          <ButtonComponent
-            text="Sign up"
-            type="link"
-            onPress={() => navigation.navigate('SignUpScreen')}
-          />
-        </RowComponent>
-      </SectionComponent>
-    </ContainerComponent>
+        </SectionComponent>
+        <SocialLogin />
+        <SectionComponent>
+          <RowComponent>
+            <TextComponent text="Don’t have an account? " />
+            <ButtonComponent
+              text="Sign up"
+              type="link"
+              onPress={() => navigation.navigate('SignUpScreen')}
+            />
+          </RowComponent>
+        </SectionComponent>
+      </ContainerComponent>
+      <LoadingModal visible={isLoading} />
+    </>
   );
 };
 

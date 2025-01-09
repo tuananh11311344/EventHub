@@ -10,8 +10,8 @@ import {fontFamily} from '../constants/fontFamily';
 
 interface Props {
   type: 'date' | 'time';
-  selected?: number; // Sử dụng số timestamp thay vì Date
-  onSelect: (val: number) => void; // Trả về số timestamp
+  selected?: number; 
+  onSelect: (val: number) => void; 
   title?: string;
 }
 
@@ -19,13 +19,13 @@ const DateTimePicker = (props: Props) => {
   const {type, selected, onSelect, title} = props;
 
   const showCalendar = () => {
-    // Chuyển timestamp (number) thành Date để sử dụng trong picker
     DateTimePickerAndroid.open({
       mode: type ?? 'date',
       value: selected ? new Date(selected) : new Date(),
       onChange: (_, date?: Date) => {
         if (date) {
-          onSelect(date.getTime()); // Trả về timestamp (number)
+          
+          onSelect(date.getTime()); 
         }
       },
     });

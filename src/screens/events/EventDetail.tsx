@@ -1,5 +1,5 @@
 import {ArrowLeft, ArrowRight, Calendar, Location} from 'iconsax-react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   ImageBackground,
@@ -24,14 +24,77 @@ import {appInfo} from '../../constants/appInfo';
 import {fontFamily} from '../../constants/fontFamily';
 import {EventModel} from '../../models/EventModel';
 import {globalStyle} from '../../styles/GlobalStyle';
+import {useDispatch, useSelector} from 'react-redux';
+import {authSelector, AuthState} from '../../redux/reducers/authReducer';
+import eventAPI from '../../api/eventApi';
+import {LoadingModal} from '../../modals';
+import {UserHandle} from '../../utils/UserHandler';
+import {DateTime} from '../../utils/datetime';
 
 const EventDetail = ({navigation, route}: any) => {
   const {item}: {item: EventModel} = route.params;
+  const auth: AuthState = useSelector(authSelector);
+  const dispatch = useDispatch();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [followers, setFollowers] = useState<string[]>([]);
+
+  useEffect(() => {
+    item && getFollowersById();
+  }, [item]);
+
+  const getFollowersById = async () => {
+    const api = `/get-followers?id=${item._id}`;
+    try {
+      const res = await eventAPI.HandleEvent(api);
+      if (res && res.data) {
+        setFollowers(res.data);
+      }
+    } catch (error) {
+      console.log('Get followers error:', error);
+    }
+  };
+
+  const handleFollower = () => {
+    const items = [...followers];
+
+    if (items.includes(auth.id)) {
+      const index = items.findIndex(element => element === auth.id);
+      if (index !== -1) {
+        items.splice(index, 1);
+      }
+    } else {
+      items.push(auth.id);
+    }
+    setFollowers(items);
+    handleUpdateFollowers(items);
+  };
+
+  const handleUpdateFollowers = async (data: string[]) => {
+    setIsLoading(true);
+
+    const api = '/update-followers';
+    try {
+      await eventAPI.HandleEvent(
+        api,
+        {
+          id: item._id,
+          followers: data,
+        },
+        'post',
+      );
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      console.log('Update followers error:', error);
+    }
+    UserHandle.getFollowedById(auth.id, dispatch);
+  };
 
   return (
     <View style={{flex: 1, backgroundColor: appColors.white}}>
       <ImageBackground
-        source={require('../../assets/images/event-image.png')}
+        source={{uri: item.photoUrl}}
         imageStyle={{
           flex: 1,
           resizeMode: 'cover',
@@ -58,9 +121,24 @@ const EventDetail = ({navigation, route}: any) => {
               />
             </RowComponent>
             <CardComponent
+              onPress={handleFollower}
               styles={[globalStyle.noSpaceCard, {width: 40, height: 40}]}
-              color="#ffffff4D">
-              <FontAwesome name="bookmark" size={16} color={appColors.white} />
+              color={
+                auth.follow_events &&
+                auth.follow_events.includes(item._id ?? '')
+                  ? '#ffffffB3'
+                  : '#ffffff4D'
+              }>
+              <FontAwesome
+                name="bookmark"
+                size={16}
+                color={
+                  auth.follow_events &&
+                  auth.follow_events.includes(item._id ?? '')
+                    ? appColors.danger2
+                    : appColors.white
+                }
+              />
             </CardComponent>
           </RowComponent>
         </LinearGradient>
@@ -70,35 +148,49 @@ const EventDetail = ({navigation, route}: any) => {
           alignItems: 'center',
           marginTop: 244 - 115,
         }}>
-        <RowComponent
-          styles={[
-            globalStyle.shadow,
-            {
-              backgroundColor: appColors.white,
-              borderRadius: 100,
-              paddingHorizontal: 12,
-            },
-          ]}>
-          <RowComponent justify="space-between" styles={{minWidth: 290}}>
-            <AvatarGroup size={32} />
-            <TouchableOpacity
-              style={[
-                {
-                  backgroundColor: appColors.primary,
-                  paddingHorizontal: 20,
-                  paddingVertical: 5,
-                  borderRadius: 10,
-                },
-              ]}>
-              <TextComponent
-                text="Invite"
-                size={14}
-                font={fontFamily.semiBold}
-                color={appColors.white}
-              />
-            </TouchableOpacity>
+        {item.users.length > 0 ? (
+          <RowComponent
+            styles={[
+              globalStyle.shadow,
+              {
+                backgroundColor: appColors.white,
+                borderRadius: 100,
+                paddingHorizontal: 15,
+              },
+            ]}>
+            <RowComponent justify="space-between" styles={{minWidth: 290}}>
+              <AvatarGroup usersId={item.users} size={32} />
+              <TouchableOpacity
+                style={[
+                  {
+                    backgroundColor: appColors.primary,
+                    paddingHorizontal: 30,
+                    paddingVertical: 8,
+                    borderRadius: 10,
+                  },
+                ]}>
+                <TextComponent
+                  text="Invite"
+                  size={14}
+                  font={fontFamily.semiBold}
+                  color={appColors.white}
+                />
+              </TouchableOpacity>
+            </RowComponent>
           </RowComponent>
-        </RowComponent>
+        ) : (
+          <>
+            <ButtonComponent
+              type="primary"
+              text="Invited"
+              styles={{
+                width: appInfo.sizes.WIDTH * 0.8,
+                borderRadius: 100,
+                marginBottom: -5,
+              }}
+            />
+          </>
+        )}
       </SectionComponent>
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -130,12 +222,14 @@ const EventDetail = ({navigation, route}: any) => {
                 justifyContent: 'space-around',
               }}>
               <TextComponent
-                text="14 December, 2021"
+                text={DateTime.getDate(item.date)}
                 font={fontFamily.medium}
                 size={16}
               />
               <TextComponent
-                text="Tuesday, 4:00PM - 9:00PM"
+                text={`${DateTime.getDay(item.date)}, ${DateTime.getTimeString(
+                  item.startAt,
+                )} - ${DateTime.getTimeString(item.endAt)}`}
                 color={appColors.gray}
                 size={12}
               />
@@ -169,6 +263,7 @@ const EventDetail = ({navigation, route}: any) => {
                 text={item.location.address}
                 color={appColors.gray}
                 size={12}
+                numberOfLine={2}
               />
             </View>
           </RowComponent>
@@ -219,7 +314,7 @@ const EventDetail = ({navigation, route}: any) => {
           padding: 12,
         }}>
         <ButtonComponent
-          text="BUY TICKET 120$"
+          text={`BUY TICKET ${item.price}$`}
           type="primary"
           onPress={() => {}}
           iconFlex="right"
@@ -236,6 +331,7 @@ const EventDetail = ({navigation, route}: any) => {
           }
         />
       </LinearGradient>
+      <LoadingModal visible={isLoading} />
     </View>
   );
 };

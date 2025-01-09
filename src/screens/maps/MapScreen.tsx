@@ -1,11 +1,11 @@
-import {View, Text, StatusBar, Touchable, FlatList} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import MapView, {Marker} from 'react-native-maps';
-import {appInfo} from '../../constants/appInfo';
-import {LocationModel} from '../../models/LocationModel';
 import Geolocation from '@react-native-community/geolocation';
+import {ArrowLeft2} from 'iconsax-react-native';
+import React, {useEffect, useRef, useState} from 'react';
+import {FlatList, StatusBar, TouchableOpacity, View} from 'react-native';
+import MapView, {Marker} from 'react-native-maps';
+import eventAPI from '../../api/eventApi';
+import {Target} from '../../assets/svgs';
 import {
-  ButtonComponent,
   CardComponent,
   CategoriesList,
   EventItem,
@@ -14,20 +14,16 @@ import {
   RowComponent,
   SpaceComponent,
 } from '../../components';
-import {ArrowLeft2, Location} from 'iconsax-react-native';
 import appColors from '../../constants/appColors';
-import {TouchableOpacity} from 'react-native';
-import {globalStyle} from '../../styles/GlobalStyle';
-import {ChefForkGreen, Target} from '../../assets/svgs';
-import eventAPI from '../../api/eventApi';
+import {appInfo} from '../../constants/appInfo';
 import {EventModel} from '../../models/EventModel';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
+import {LocationModel} from '../../models/LocationModel';
+import {globalStyle} from '../../styles/GlobalStyle';
 
 const MapScreen = ({navigation}: any) => {
   const [currentLocation, setCurrentLocation] = useState<LocationModel>();
   const [events, setEvents] = useState<EventModel[]>([]);
-  const auth = useSelector(authSelector);
+  const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
     Geolocation.getCurrentPosition(position => {
@@ -44,9 +40,7 @@ const MapScreen = ({navigation}: any) => {
     currentLocation && getNearByEvents();
   }, [currentLocation]);
   const getNearByEvents = async () => {
-    const api = `/get-events?lat=${currentLocation?.lat}&long=${
-      currentLocation?.long
-    }&distance=${5}&id=${auth.id}`;
+    const api = `/get-events?lat=${currentLocation?.lat}&long=${currentLocation?.long}&distance=5`;
     try {
       const res = await eventAPI.HandleEvent(api);
       setEvents(res.data);
@@ -60,6 +54,7 @@ const MapScreen = ({navigation}: any) => {
       <StatusBar barStyle={'dark-content'} />
       {currentLocation && (
         <MapView
+          ref={mapRef}
           style={{
             flex: 1,
             zIndex: -1,
@@ -131,7 +126,20 @@ const MapScreen = ({navigation}: any) => {
                 height: 56,
               },
             ]}
-            color={appColors.white}>
+            color={appColors.white}
+            onPress={() => {
+              if (currentLocation && mapRef.current) {
+                mapRef.current.animateToRegion(
+                  {
+                    latitude: currentLocation.lat,
+                    longitude: currentLocation.long,
+                    latitudeDelta: 0.005,
+                    longitudeDelta: 0.005,
+                  },
+                  1000,
+                );
+              }
+            }}>
             <Target />
           </CardComponent>
         </RowComponent>

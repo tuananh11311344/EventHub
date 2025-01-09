@@ -14,6 +14,8 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {globalStyle} from '../styles/GlobalStyle';
 import {useNavigation} from '@react-navigation/native';
 import {DateTime} from '../utils/datetime';
+import {useSelector} from 'react-redux';
+import {authSelector, AuthState} from '../redux/reducers/authReducer';
 
 interface Props {
   item: EventModel;
@@ -24,13 +26,13 @@ const EventItem = (props: Props) => {
   const {item, type} = props;
 
   const navigation: any = useNavigation();
+  const auth: AuthState = useSelector(authSelector);
 
   return (
     <CardComponent
       styles={{width: appInfo.sizes.WIDTH * 0.7}}
       isShadow
       onPress={() =>
-        type === 'card' &&
         navigation.navigate('EventDetail', {
           item: item,
         })
@@ -39,7 +41,7 @@ const EventItem = (props: Props) => {
         <>
           <ImageBackground
             style={{flex: 1, marginBottom: 12, height: 131}}
-            source={require('../assets/images/event-image.png')}
+            source={{uri: item.photoUrl}}
             imageStyle={{
               padding: 10,
               resizeMode: 'cover',
@@ -47,36 +49,41 @@ const EventItem = (props: Props) => {
             }}>
             <RowComponent
               justify="space-between"
-              styles={{alignItems: 'flex-start'}}>
+              styles={{alignItems: 'flex-start', paddingHorizontal: 10}}>
               <CardComponent
                 styles={[globalStyle.noSpaceCard]}
                 color="#ffffffB3">
                 <TextComponent
                   color={appColors.danger2}
                   font={fontFamily.bold}
-                  text="10"
+                  text={`${new Date(item.date).getDate()}`}
                   size={18}
                 />
                 <TextComponent
                   color={appColors.danger2}
                   font={fontFamily.semiBold}
-                  size={10}
-                  text="JUNE"
+                  size={13}
+                  text={DateTime.getMonthString(
+                    new Date(item.date).toISOString(),
+                  )}
                 />
               </CardComponent>
-              <CardComponent
-                styles={[globalStyle.noSpaceCard, {width: 35, height: 35}]}
-                color="#ffffffB3">
-                <FontAwesome
-                  name="bookmark"
-                  size={15}
-                  color={appColors.danger}
-                />
-              </CardComponent>
+              {auth.follow_events &&
+                auth.follow_events.includes(item._id ?? '') && (
+                  <CardComponent
+                    styles={[globalStyle.noSpaceCard, {width: 35, height: 35}]}
+                    color="#ffffffB3">
+                    <FontAwesome
+                      name="bookmark"
+                      size={15}
+                      color={appColors.danger}
+                    />
+                  </CardComponent>
+                )}
             </RowComponent>
           </ImageBackground>
           <TextComponent numberOfLine={1} text={item.title} title size={18} />
-          <AvatarGroup />
+          <AvatarGroup usersId={item.users} />
           <RowComponent>
             <Location size={18} color={appColors.text3} variant="Bold" />
             <SpaceComponent width={10} />
@@ -110,7 +117,7 @@ const EventItem = (props: Props) => {
                 alignItems: 'flex-start',
               }}>
               <TextComponent
-                text={`${DateTime.getDayString(
+                text={`${DateTime.getDatesString(
                   item.date,
                 )} • ${DateTime.getTimeString(item.startAt)}`}
                 color={appColors.primary}
