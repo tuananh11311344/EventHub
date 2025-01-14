@@ -1,5 +1,5 @@
 import {View, Text} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ButtonComponent,
   RowComponent,
@@ -14,6 +14,8 @@ import appColors from '../../../constants/appColors';
 import {Edit, Edit2} from 'iconsax-react-native';
 import {globalStyle} from '../../../styles/GlobalStyle';
 import {ModalSelectCategories} from '../../../modals';
+import {Category} from '../../../models/CategoryModel';
+import eventAPI from '../../../api/eventApi';
 
 interface Props {
   profile: ProfileModel;
@@ -22,7 +24,24 @@ interface Props {
 const EditProfile = (props: Props) => {
   const navigation: any = useNavigation();
   const [isVisibleModalCatogory, setIsVisibleModalCatogory] = useState(false);
+  const [category, setCategory] = useState<Category[]>([]);
+
   const {profile} = props;
+
+  useEffect(() => {
+    getCategories();
+  }, []);
+
+  const getCategories = async () => {
+    const api = `/get-categories`;
+    try {
+      const res: any = await eventAPI.HandleEvent(api);
+      setCategory(res.data);
+    } catch (error) {
+      console.log('Get categories error:', error);
+    }
+  };
+
   return (
     <SectionComponent>
       <RowComponent>
@@ -58,10 +77,20 @@ const EditProfile = (props: Props) => {
           <RowComponent
             onPress={() => {
               setIsVisibleModalCatogory(true);
-            }}>
-            <Edit2 size={18} color={appColors.text} />
+            }}
+            styles={[
+              globalStyle.tag,
+              {
+                backgroundColor: '#5669FF40',
+              },
+            ]}>
+            <Edit2 size={18} color={appColors.primary} />
             <SpaceComponent width={8} />
-            <TextComponent text="Change" />
+            <TextComponent
+              text="Change"
+              styles={{paddingVertical: 3}}
+              color={appColors.primary}
+            />
           </RowComponent>
         </RowComponent>
         <RowComponent
@@ -70,32 +99,34 @@ const EditProfile = (props: Props) => {
             justifyContent: 'flex-start',
             marginTop: 10,
           }}>
-          {Array.from({length: 9}).map((item, index) => (
-            <TagComponent
-              key={`tag${index}`}
-              bgColor="#e0e0e0"
-              label="Music"
-              onPress={() => {}}
-              styles={{
-                marginRight: 8,
-                marginBottom: 12,
-              }}
-            />
-          ))}
+          {category.length > 0 &&
+            category.map(
+              item =>
+                profile.interests?.includes(item._id) && (
+                  <View
+                    key={item._id}
+                    style={[
+                      globalStyle.tag,
+                      {backgroundColor: item.color, margin: 6},
+                    ]}>
+                    <TextComponent text={item.title} color={appColors.white} />
+                  </View>
+                ),
+            )}
         </RowComponent>
       </>
       <ModalSelectCategories
-        selected={[]}
-        onSelected={val =>{
-          console.log(val);
+        selected={profile.interests}
+        onSelected={() => {
           setIsVisibleModalCatogory(false);
-          navigation.navigate("ProfileScreen",{
+          navigation.navigate('ProfileScreen', {
             isUpdated: true,
-            id: profile.uid
+            id: profile.uid,
           });
         }}
         onClose={() => setIsVisibleModalCatogory(false)}
         visible={isVisibleModalCatogory}
+        category={category}
       />
     </SectionComponent>
   );

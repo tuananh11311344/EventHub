@@ -21,18 +21,20 @@ interface Props {
   title?: string;
   children: ReactNode;
   back?: boolean;
-  onBack?: () => void
+  onBack?: () => void;
+  right?: ReactNode;
 }
 
 const ContainerComponent = (props: Props) => {
-  const {children, isScroll, isImageBackground, title, back, onBack} = props;
+  const {children, isScroll, isImageBackground, title, back, onBack, right} =
+    props;
 
   const navigation: any = useNavigation();
 
   const headerComponent = () => {
     return (
       <View style={{flex: 1, marginTop: 50}}>
-        {(title || back) && (
+        {(title || back || right) && (
           <RowComponent
             styles={{
               paddingHorizontal: 16,
@@ -44,23 +46,26 @@ const ContainerComponent = (props: Props) => {
             {back && (
               <TouchableOpacity
                 onPress={() => {
-                  navigation.goBack()
-                  onBack && onBack()
+                  navigation.goBack();
+                  onBack && onBack();
                 }}
                 style={{marginRight: 12}}>
                 <ArrowLeft size={24} color={appColors.text} />
               </TouchableOpacity>
             )}
-            {title ? (
-              <TextComponent
-                text={title}
-                size={16}
-                font={fontFamily.medium}
-                flex={1}
-              />
-            ) : (
-              <></>
-            )}
+            <View style={{flex: 1}}>
+              {title ? (
+                <TextComponent
+                  text={title}
+                  size={16}
+                  font={fontFamily.medium}
+                  flex={1}
+                />
+              ) : (
+                <></>
+              )}
+            </View>
+            {right && right}
           </RowComponent>
         )}
         {returnContainer}
@@ -85,7 +90,7 @@ const ContainerComponent = (props: Props) => {
     </ImageBackground>
   ) : (
     <SafeAreaView style={[globalStyle.container]}>
-      <StatusBar barStyle={'dark-content'}/>
+      <StatusBar barStyle={'dark-content'} />
       <View style={[globalStyle.container]}>{headerComponent()}</View>
     </SafeAreaView>
   );

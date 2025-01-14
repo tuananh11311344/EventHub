@@ -5,7 +5,7 @@ export const appInfo = {
     WIDTH: Dimensions.get('window').width,
     HEIGHT: Dimensions.get('window').height,
   },
-  BASE_URL: 'http://10.10.65.8:3001',
+  BASE_URL: 'http://10.10.65.2:3001',
   GOOOGLE_API_KEY: 'AIzaSyCUWf0sstWVdu8fdWgwyWABK3Z701Nu_QY',
   monthCollapseNames: [
     'Jan',

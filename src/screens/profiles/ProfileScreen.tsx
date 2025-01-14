@@ -2,6 +2,7 @@ import {View, Text, ActivityIndicator, Image} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {
   AvatarComponent,
+  ButtonComponent,
   ContainerComponent,
   RowComponent,
   SectionComponent,
@@ -22,6 +23,7 @@ import appColors from '../../constants/appColors';
 import {globalStyle} from '../../styles/GlobalStyle';
 import AboutProfile from './components/AboutProfile';
 import EditProfile from './components/EditProfile';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const ProfileScreen = ({navigation, route}: any) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +44,7 @@ const ProfileScreen = ({navigation, route}: any) => {
     } else {
       setProfileId(auth.id);
     }
-  }, [route]);
+  }, [route.params]);
 
   useEffect(() => {
     if (profile) {
@@ -98,8 +100,15 @@ const ProfileScreen = ({navigation, route}: any) => {
       <ContainerComponent
         isScroll
         back
-        title="Profile"
-        onBack={() => navigation.navigate('Explore')}>
+        title={route.params ? '' : 'Profile'}
+        right={
+          <ButtonComponent
+            icon={<MaterialIcons name="more-vert" size={22} />}
+            onPress={() => {}}
+          />
+        }
+        // onBack={() => navigation.navigate('Explore')}
+      >
         {profile ? (
           <>
             <SectionComponent styles={[globalStyle.center]}>
@@ -124,20 +133,29 @@ const ProfileScreen = ({navigation, route}: any) => {
                     text={`${profile.following.length}`}
                     size={18}
                   />
+                  <SpaceComponent height={6}/>
                   <TextComponent text="Following" size={18} />
                 </View>
+                <View
+                  style={{
+                    backgroundColor: appColors.gray2,
+                    width: 1,
+                    height: '100%',
+                  }}
+                />
                 <View style={[globalStyle.center, {flex: 1}]}>
                   <TextComponent
                     title
                     text={`${userFollowers.length}`}
                     size={18}
                   />
+                  <SpaceComponent height={6}/>
                   <TextComponent text="Follower" size={18} />
                 </View>
               </RowComponent>
             </SectionComponent>
             {auth.id !== profileId ? (
-              <AboutProfile />
+              <AboutProfile profile={profile}/>
             ) : (
               <EditProfile profile={profile} />
             )}
