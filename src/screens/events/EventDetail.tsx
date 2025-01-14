@@ -267,7 +267,19 @@ const EventDetail = ({navigation, route}: any) => {
               />
             </View>
           </RowComponent>
-          <RowComponent styles={{marginBottom: 20}}>
+          <RowComponent
+            styles={{marginBottom: 20}}
+            onPress={() =>
+              navigation.navigate('Main', {
+                screen: 'HomeNavigator',
+                params: {
+                  screen: 'Profile',
+                  params: {
+                    id: item.authorId,
+                  },
+                },
+              })
+            }>
             <Image
               source={{
                 uri: 'https://gear5world.com/cdn/shop/articles/luffy_mugiwara_chapeau_paille_one_piece.jpg?v=1698943111',

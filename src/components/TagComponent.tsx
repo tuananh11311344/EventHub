@@ -24,7 +24,8 @@ const TagComponent = (props: Props) => {
           backgroundColor: bgColor ?? appColors.white,
         },
         styles,
-      ]}>
+      ]}
+      >
       {icon && icon}
       <TextComponent
         text={label}

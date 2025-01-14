@@ -1,6 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { EventDetail, HomeScreen, SearchEvents } from '../screens';
+import { HomeScreen, SearchEvents } from '../screens';
 
 const ExploreNavigator = () => {
     const Stack = createNativeStackNavigator();

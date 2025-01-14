@@ -48,7 +48,7 @@ const HomeScreen = ({navigation}: any) => {
   const [eventsUpcoming, setEventsUpcoming] = useState<EventModel[]>([]);
   const [eventsNearby, setEventsNearby] = useState<EventModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   useEffect(() => {
     setIsLoading(true);
     Geolocation.getCurrentPosition(position => {

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import {
   Bookmark2,
   Calendar,
@@ -10,35 +10,35 @@ import {
   Sms,
   User,
 } from 'iconsax-react-native';
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   FlatList,
-  Image,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import appColors from '../constants/appColors';
+import { LoadingModal } from '../modals';
 import {
   authSelector,
   AuthState,
   removeAuth,
 } from '../redux/reducers/authReducer';
-import {globalStyle} from '../styles/GlobalStyle';
+import { globalStyle } from '../styles/GlobalStyle';
+import { HandleNotification } from '../utils/handleNotification';
+import AvatarComponent from './AvatarComponent';
 import RowComponent from './RowComponent';
 import SpaceComponent from './SpaceComponent';
 import TextComponent from './TextComponent';
-import {HandleNotification} from '../utils/handleNotification';
-import {LoadingModal} from '../modals';
 
 const DrawerCustom = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const auth: AuthState = useSelector(authSelector);
-  
+
   const dispatch = useDispatch();
   const size = 20;
   const color = appColors.gray;
@@ -104,27 +104,46 @@ const DrawerCustom = ({navigation}: any) => {
     dispatch(removeAuth());
     setIsLoading(false);
   };
+  const handleNavigation = (key: string) => {
+    switch (key) {
+      case 'SignOut':
+        handleSignOut();
+        break;
+      case 'MyProfile':
+        navigation.navigate('HomeNavigator', {
+          screen: 'Profile',
+          params: {
+            screen: 'ProfileScreen',
+            params: {
+              id: auth.id,
+            },
+          },
+        });
+
+        break;
+      default:
+        break;
+    }
+    navigation.closeDrawer();
+  };
 
   return (
     <>
       <View style={[localStyle.container]}>
-        <TouchableOpacity
+        <AvatarComponent
           onPress={() => {
-            navigation.closeDrawer();
-            navigation.navigate('Profile', {
-              screen: 'ProfileScreen',
-            });
-          }}>
-          {auth.photoUrl ? (
-            <Image source={{uri: auth.photoUrl}} style={[localStyle.avatar]} />
-          ) : (
-            <Image
-              source={require('../assets/images/user.png')}
-              style={[localStyle.avatar]}
-            />
-          )}
-          <TextComponent text={auth.fullname} title size={18} />
-        </TouchableOpacity>
+            handleNavigation('MyProfile');
+          }}
+          photoUrl={auth.photoUrl}
+          name={auth.fullname}
+          styles={[localStyle.avatar]}
+        />
+        <TextComponent
+          text={auth.fullname}
+          title
+          size={18}
+          styles={{marginTop: 8}}
+        />
         <View style={{paddingVertical: 20, flex: 1}}>
           <FlatList
             showsVerticalScrollIndicator={false}
@@ -133,13 +152,7 @@ const DrawerCustom = ({navigation}: any) => {
             renderItem={({item, index}) => (
               <RowComponent
                 styles={[localStyle.listItem]}
-                onPress={
-                  item.key === 'SignOut'
-                    ? () => handleSignOut()
-                    : () => {
-                        navigation.closeDrawer();
-                      }
-                }>
+                onPress={() => handleNavigation(item.key)}>
                 {item.icon}
                 <TextComponent
                   text={item.title}

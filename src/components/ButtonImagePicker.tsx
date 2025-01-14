@@ -22,10 +22,11 @@ import { globalStyle } from '../styles/GlobalStyle';
 interface Props {
   onSelect: (val: {type: 'url' | 'base64'; value: any}) => void;
   errorMessage?: string;
+  title?: string
 }
 
 const ButtonImagePicker = (props: Props) => {
-  const {onSelect, errorMessage} = props;
+  const {onSelect, errorMessage, title} = props;
   const modalizeRef = useRef<Modalize>(null);
 
   const [imageUrl, setImageUrl] = useState('');
@@ -103,7 +104,7 @@ const ButtonImagePicker = (props: Props) => {
   return (
     <View style={{marginBottom: 20}}>
       <ButtonComponent
-        text="Upload image"
+        text= {title ? title : "Upload image"}
         onPress={() => modalizeRef.current?.open()}
         type="link"
       />

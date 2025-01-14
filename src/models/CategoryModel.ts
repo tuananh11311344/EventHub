@@ -1,8 +1,9 @@
-import { ReactNode } from "react";
+import {ReactNode} from 'react';
 
 export interface Category {
-    key: string;
-    title: string;
-    icon: ReactNode;
-    iconColor: string;
-  }
+  _id: string;
+  key: string;
+  title: string;
+  icon: ReactNode;
+  iconColor: string;
+}

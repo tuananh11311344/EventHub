@@ -1,3 +1,4 @@
+import AvatarComponent from './AvatarComponent';
 import AvatarGroup from './AvatarGroup';
 import ButtonComponent from './ButtonComponent';
 import ButtonImagePicker from './ButtonImagePicker';
@@ -41,5 +42,6 @@ export {
   DropdownPicker,
   ButtonImagePicker,
   MarkerCustom,
-  LoadingComponent
+  LoadingComponent,
+  AvatarComponent
 };

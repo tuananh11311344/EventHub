@@ -96,4 +96,8 @@ export const globalStyle = StyleSheet.create({
     color: appColors.danger,
     fontSize: 12,
   },
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
 });
