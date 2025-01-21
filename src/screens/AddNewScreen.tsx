@@ -20,6 +20,7 @@ import {Image} from 'react-native';
 import {Validate} from '../utils/validate';
 import {EventModel} from '../models/EventModel';
 import eventAPI from '../api/eventApi';
+import {LoadingModal} from '../modals';
 
 const initValue = {
   title: '',
@@ -41,7 +42,8 @@ const initValue = {
 };
 
 const AddNewScreen = ({navigation}: any) => {
-  const auth = useSelector(authSelector);
+  const auth = useSelector(authSelector);  
+  const [isLoading, setIsLoading] = useState(false);
   const [eventData, setEventData] = useState<EventModel>({
     ...initValue,
     authorId: auth.id,
@@ -50,7 +52,7 @@ const AddNewScreen = ({navigation}: any) => {
   const [errorMes, setErrorMes] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
-    handleGetAllUsers();
+    handleGetAllUsers();    
   }, []);
 
   const handleGetAllUsers = async () => {
@@ -87,19 +89,24 @@ const AddNewScreen = ({navigation}: any) => {
       return;
     }
 
+    setIsLoading(true);
+
     const api = '/add-new';
     try {
       const res = await eventAPI.HandleEvent(api, eventData, 'post');
-      if(res){
-        navigation.goBack()
-        setEventData(initValue);
+      if (res) {
+        navigation.goBack();
+        setEventData({ ...initValue, authorId: auth.id });
       }
     } catch (error) {
       console.log('Error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const convertUrlToBase64 = async (url: string) => {
+    setIsLoading(true);
     try {
       const response = await RNFetchBlob.fetch('GET', url);
       const base64Data = response.base64();
@@ -109,136 +116,145 @@ const AddNewScreen = ({navigation}: any) => {
     } catch (error) {
       console.error('Lỗi khi chuyển URL thành base64:', error);
       return null;
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
-    <ContainerComponent isScroll back onBack={()=> setEventData(initValue)} title="Add New Event">
-      <SectionComponent>
-        <ButtonImagePicker
-          onSelect={val => {
-            val.type === 'url'
-              ? convertUrlToBase64(val.value as string)
-              : handleChangeValue('photoUrl', val.value);
-          }}
-          errorMessage={errorMes.photoUrl}
-        />
-        {eventData.photoUrl && (
-          <Image
-            source={{uri: eventData.photoUrl}}
-            style={{width: '100%', height: 250, marginBottom: 20}}
-            resizeMode="cover"
+    <>
+      <ContainerComponent
+        isScroll
+        back
+        onBack={() => setEventData(initValue)}
+        title="Add New Event">
+        <SectionComponent>
+          <ButtonImagePicker
+            onSelect={val => {
+              val.type === 'url'
+                ? convertUrlToBase64(val.value as string)
+                : handleChangeValue('photoUrl', val.value);
+            }}
+            errorMessage={errorMes.photoUrl}
           />
-        )}
-        <InputComponent
-          title="Title"
-          placeholder="Enter a event title"
-          value={eventData.title}
-          onChange={val => handleChangeValue('title', val)}
-          allowClear
-          errorMessage={errorMes.title}
-        />
-        <InputComponent
-          title="Description"
-          placeholder="Enter a event description"
-          value={eventData.description}
-          onChange={val => handleChangeValue('description', val)}
-          multiline
-          numberOfLine={3}
-          allowClear
-          errorMessage={errorMes.description}
-        />
+          {eventData.photoUrl && (
+            <Image
+              source={{uri: eventData.photoUrl}}
+              style={{width: '100%', height: 250, marginBottom: 20}}
+              resizeMode="cover"
+            />
+          )}
+          <InputComponent
+            title="Title"
+            placeholder="Enter a event title"
+            value={eventData.title}
+            onChange={val => handleChangeValue('title', val)}
+            allowClear
+            errorMessage={errorMes.title}
+          />
+          <InputComponent
+            title="Description"
+            placeholder="Enter a event description"
+            value={eventData.description}
+            onChange={val => handleChangeValue('description', val)}
+            multiline
+            numberOfLine={3}
+            allowClear
+            errorMessage={errorMes.description}
+          />
 
-        <DropdownPicker
-          label="Category"
-          selected={eventData.category}
-          values={[
-            {
-              label: 'Sports',
-              value: 'sports',
-            },
-            {
-              label: 'Food',
-              value: 'food',
-            },
-            {
-              label: 'Art',
-              value: 'art',
-            },
-            {
-              label: 'Music',
-              value: 'music',
-            },
-          ]}
-          onSelect={val => handleChangeValue('category', val)}
-          errorMessage={errorMes.category}
-        />
+          <DropdownPicker
+            label="Category"
+            selected={eventData.category}
+            values={[
+              {
+                label: 'Sports',
+                value: 'sports',
+              },
+              {
+                label: 'Food',
+                value: 'food',
+              },
+              {
+                label: 'Art',
+                value: 'art',
+              },
+              {
+                label: 'Music',
+                value: 'music',
+              },
+            ]}
+            onSelect={val => handleChangeValue('category', val)}
+            errorMessage={errorMes.category}
+          />
 
-        <DateTimePicker
-          title="DateTime"
-          selected={eventData.date}
-          type="date"
-          onSelect={val => handleChangeValue('date', val)}
-        />
-
-        <RowComponent styles={{marginHorizontal: 30}}>
           <DateTimePicker
-            title="Start At"
-            selected={eventData.startAt}
-            type="time"
-            onSelect={val => handleChangeValue('startAt', val)}
+            title="DateTime"
+            selected={eventData.date}
+            type="date"
+            onSelect={val => handleChangeValue('date', val)}
           />
-          <SpaceComponent width={20} />
-          <DateTimePicker
-            title="End At"
-            selected={eventData.endAt}
-            type="time"
-            onSelect={val => handleChangeValue('endAt', val)}
+
+          <RowComponent styles={{marginHorizontal: 30}}>
+            <DateTimePicker
+              title="Start At"
+              selected={eventData.startAt}
+              type="time"
+              onSelect={val => handleChangeValue('startAt', val)}
+            />
+            <SpaceComponent width={20} />
+            <DateTimePicker
+              title="End At"
+              selected={eventData.endAt}
+              type="time"
+              onSelect={val => handleChangeValue('endAt', val)}
+            />
+          </RowComponent>
+          <DropdownPicker
+            values={usersSelect}
+            selected={eventData.users}
+            onSelect={val => handleChangeValue('users', val)}
+            label="Invite users"
+            multiple
           />
-        </RowComponent>
-        <DropdownPicker
-          values={usersSelect}
-          selected={eventData.users}
-          onSelect={val => handleChangeValue('users', val)}
-          label="Invite users"
-          multiple
-        />
-        <InputComponent
-          title="Price"
-          placeholder="Enter a event price"
-          value={eventData.price}
-          onChange={val => handleChangeValue('price', val)}
-          allowClear
-          type="number-pad"
-          errorMessage={errorMes.price}
-        />
-        <InputComponent
-          title="Title dddress"
-          placeholder="Enter a title address"
-          allowClear
-          value={eventData.titleAddress}
-          onChange={val => handleChangeValue('titleAddress', val)}
-          errorMessage={errorMes.titleAddress}
-        />
-        <ChoiceLocation
-          title="Location"
-          onSelect={location =>
-            handleChangeValue('location', {
-              address: location.display_name,
-              lat: location.lat,
-              long: location.long,
-            })
-          }
-          errorMessage={errorMes.location}
-        />
-      </SectionComponent>
-      <SectionComponent>
-        <ButtonComponent
-          text="Add New"
-          type="primary"
-          onPress={handleAddEvent}
-        />
-      </SectionComponent>
-    </ContainerComponent>
+          <InputComponent
+            title="Price"
+            placeholder="Enter a event price"
+            value={eventData.price}
+            onChange={val => handleChangeValue('price', val)}
+            allowClear
+            type="number-pad"
+            errorMessage={errorMes.price}
+          />
+          <InputComponent
+            title="Title dddress"
+            placeholder="Enter a title address"
+            allowClear
+            value={eventData.titleAddress}
+            onChange={val => handleChangeValue('titleAddress', val)}
+            errorMessage={errorMes.titleAddress}
+          />
+          <ChoiceLocation
+            title="Location"
+            onSelect={location =>
+              handleChangeValue('location', {
+                address: location.display_name,
+                lat: location.lat,
+                long: location.long,
+              })
+            }
+            errorMessage={errorMes.location}
+          />
+        </SectionComponent>
+        <SectionComponent>
+          <ButtonComponent
+            text="Add New"
+            type="primary"
+            onPress={handleAddEvent}
+          />
+        </SectionComponent>
+      </ContainerComponent>
+      <LoadingModal visible={isLoading} />
+    </>
   );
 };
 

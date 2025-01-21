@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import AppRouter from './src/navigators/AppRouter';
 import store from './src/redux/store';
 import { HandleNotification } from './src/utils/handleNotification';
-
+import Toast from 'react-native-toast-message';
 const App = () => {
   useEffect(() => {
     HandleNotification.checkNotificationPersion();
@@ -27,6 +27,7 @@ const App = () => {
             </NavigationContainer>
           </Host>
         </Provider>
+        <Toast />
       </GestureHandlerRootView>
     </>
   );

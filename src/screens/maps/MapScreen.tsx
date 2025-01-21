@@ -26,14 +26,24 @@ const MapScreen = ({navigation}: any) => {
   const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
-    Geolocation.getCurrentPosition(position => {
-      if (position.coords) {
-        setCurrentLocation({
-          lat: position.coords.latitude,
-          long: position.coords.longitude,
-        });
-      }
-    });
+    Geolocation.getCurrentPosition(
+      position => {
+        if (position.coords) {
+          setCurrentLocation({
+            lat: position.coords.latitude,
+            long: position.coords.longitude,
+          });
+        }
+      },
+      error => {
+        console.error(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 0,
+      },
+    );
   }, []);
 
   useEffect(() => {

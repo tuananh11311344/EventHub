@@ -1,17 +1,26 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
-import { HomeScreen, SearchEvents } from '../screens';
+import {
+  ExplorerEvent,
+  HomeScreen,
+  SearchEvents,
+} from '../screens';
+import {useStatusBar} from '../utils/useStatusBar';
 
 const ExploreNavigator = () => {
-    const Stack = createNativeStackNavigator();
+  const Stack = createNativeStackNavigator();
+  useStatusBar('light-content');
   return (
-    <Stack.Navigator screenOptions={{
-        headerShown: false
-    }}>
-        <Stack.Screen name='HomeScreen' component={HomeScreen} />
-        <Stack.Screen name='SearchEvents' component={SearchEvents} />
+    <Stack.Navigator
+      initialRouteName="HomeScreen"
+      screenOptions={{
+        headerShown: false,
+      }}>
+      <Stack.Screen name="HomeScreen" component={HomeScreen} />
+      <Stack.Screen name="SearchEvents" component={SearchEvents} />
+      <Stack.Screen name="ExplorerEvent" component={ExplorerEvent} />
     </Stack.Navigator>
-  )
-}
+  );
+};
 
-export default ExploreNavigator
+export default ExploreNavigator;

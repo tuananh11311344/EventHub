@@ -1,40 +1,46 @@
-import {View, Text, ImageBackground, Image} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Location } from 'iconsax-react-native';
 import React from 'react';
-import CardComponent from './CardComponent';
-import TextComponent from './TextComponent';
-import {EventModel} from '../models/EventModel';
-import AvatarGroup from './AvatarGroup';
-import RowComponent from './RowComponent';
-import {Location} from 'iconsax-react-native';
-import appColors from '../constants/appColors';
-import SpaceComponent from './SpaceComponent';
-import {appInfo} from '../constants/appInfo';
-import {fontFamily} from '../constants/fontFamily';
+import {
+  Image,
+  ImageBackground,
+  StyleProp,
+  ViewStyle
+} from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {globalStyle} from '../styles/GlobalStyle';
-import {useNavigation} from '@react-navigation/native';
-import {DateTime} from '../utils/datetime';
-import {useSelector} from 'react-redux';
-import {authSelector, AuthState} from '../redux/reducers/authReducer';
+import { useSelector } from 'react-redux';
+import appColors from '../constants/appColors';
+import { appInfo } from '../constants/appInfo';
+import { fontFamily } from '../constants/fontFamily';
+import { EventModel } from '../models/EventModel';
+import { authSelector, AuthState } from '../redux/reducers/authReducer';
+import { globalStyle } from '../styles/GlobalStyle';
+import { DateTime } from '../utils/datetime';
+import AvatarGroup from './AvatarGroup';
+import CardComponent from './CardComponent';
+import RowComponent from './RowComponent';
+import SpaceComponent from './SpaceComponent';
+import TextComponent from './TextComponent';
 
 interface Props {
   item: EventModel;
   type: 'card' | 'list';
+  styles?: StyleProp<ViewStyle>;
 }
 
 const EventItem = (props: Props) => {
-  const {item, type} = props;
+  const {item, type, styles} = props;
 
   const navigation: any = useNavigation();
   const auth: AuthState = useSelector(authSelector);
 
   return (
     <CardComponent
-      styles={{width: appInfo.sizes.WIDTH * 0.7}}
+      styles={[{width: appInfo.sizes.WIDTH * 0.7}, styles]}
       isShadow
       onPress={() =>
         navigation.navigate('EventDetail', {
-          item: item,
+          id: item._id,
         })
       }>
       {type === 'card' ? (

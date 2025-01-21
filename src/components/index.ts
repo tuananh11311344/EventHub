@@ -12,14 +12,17 @@ import DrawerCustom from './DrawerCustom';
 import DropdownPicker from './DropdownPicker';
 import EventItem from './EventItem';
 import InputComponent from './InputComponent';
+import ListEventComponent from './ListEventComponent';
 import LoadingComponent from './LoadingComponent';
 import MarkerCustom from './MarkerCustom';
+import PaginationComponent from './PaginationComponent';
 import RowComponent from './RowComponent';
 import SectionComponent from './SectionComponent';
 import SpaceComponent from './SpaceComponent';
 import TabBarComponent from './TabBarComponent';
 import TagComponent from './TagComponent';
 import TextComponent from './TextComponent';
+import UserComponent from './UserComponent';
 
 export {
   SpaceComponent,
@@ -43,5 +46,8 @@ export {
   ButtonImagePicker,
   MarkerCustom,
   LoadingComponent,
-  AvatarComponent
+  AvatarComponent,
+  UserComponent,
+  ListEventComponent,
+  PaginationComponent
 };

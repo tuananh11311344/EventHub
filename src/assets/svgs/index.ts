@@ -7,4 +7,5 @@ import Music from './Music.svg'
 import Art from './Art.svg'
 import Sports from './Sports.svg'
 import Food from './Food.svg'
-export {Facebook, Google, ChefFork, Target, ChefForkGreen, Music,Art, Sports, Food};
+import Calendar from './Calendar.svg'
+export {Facebook, Google, ChefFork, Target, ChefForkGreen, Music,Art, Sports, Food, Calendar};

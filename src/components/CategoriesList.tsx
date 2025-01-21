@@ -1,12 +1,13 @@
-import {View, Text, FlatList} from 'react-native';
-import React, {ReactNode} from 'react';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import {RowComponent, SpaceComponent, TextComponent} from '.';
+import { useNavigation } from '@react-navigation/native';
+import React, { ReactNode } from 'react';
+import { FlatList, View } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { RowComponent, SpaceComponent, TextComponent } from '.';
+import { ChefFork, ChefForkGreen } from '../assets/svgs';
 import appColors from '../constants/appColors';
-import {globalStyle} from '../styles/GlobalStyle';
-import {ChefFork, ChefForkGreen} from '../assets/svgs';
-import {fontFamily} from '../constants/fontFamily';
+import { fontFamily } from '../constants/fontFamily';
+import { globalStyle } from '../styles/GlobalStyle';
 
 interface Props {
   isColor?: boolean;
@@ -20,11 +21,12 @@ interface Category {
 }
 
 const CategoriesList = (props: Props) => {
+  const navigation: any = useNavigation();
   const {isColor} = props;
 
   const categories: Category[] = [
     {
-      key: '1',
+      key: 'sports',
       icon: (
         <Ionicons
           name="basketball"
@@ -36,7 +38,7 @@ const CategoriesList = (props: Props) => {
       title: 'Sports',
     },
     {
-      key: '2',
+      key: 'music',
       icon: (
         <FontAwesome
           name="music"
@@ -48,13 +50,13 @@ const CategoriesList = (props: Props) => {
       title: 'Music',
     },
     {
-      key: '3',
+      key: 'food',
       icon: isColor ? <ChefFork /> : <ChefForkGreen />,
       iconColor: '#29D697',
       title: 'Food',
     },
     {
-      key: '4',
+      key: 'art',
       icon: (
         <Ionicons
           name="color-palette-sharp"
@@ -70,7 +72,12 @@ const CategoriesList = (props: Props) => {
   const renderTagCategory = (item: Category) => {
     return (
       <RowComponent
-        onPress={() => {}}
+        onPress={() =>
+          navigation.navigate('ExplorerEvent', {
+            filter: item.key,
+            category: item.key,
+          })
+        }
         styles={[
           globalStyle.tag,
           {

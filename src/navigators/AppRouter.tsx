@@ -1,13 +1,9 @@
-import { useAsyncStorage } from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  addAuth,
-  authSelector,
-  AuthState
-} from '../redux/reducers/authReducer';
-import { SplashScreen } from '../screens';
-import { UserHandle } from '../utils/UserHandler';
+import {useAsyncStorage} from '@react-native-async-storage/async-storage';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {addAuth, authSelector, AuthState} from '../redux/reducers/authReducer';
+import {SplashScreen} from '../screens';
+import {UserHandle} from '../utils/UserHandler';
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 
@@ -24,7 +20,8 @@ const AppRouter = () => {
 
   useEffect(() => {
     if (auth.id) {
-      UserHandle.getFollowedById(auth.id, dispatch);
+      UserHandle.getFollowedEventById(auth.id, dispatch);
+      UserHandle.getFollowingById(auth.id, dispatch);
     }
   }, [auth.id]);
   const handleGetData = async () => {

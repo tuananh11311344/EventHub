@@ -1,4 +1,7 @@
 import Geolocation from '@react-native-community/geolocation';
+import messaging, {
+  FirebaseMessagingTypes,
+} from '@react-native-firebase/messaging';
 import axios from 'axios';
 import {
   HambergerMenu,
@@ -12,10 +15,10 @@ import {
   ImageBackground,
   ScrollView,
   StatusBar,
-  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useDispatch, useSelector} from 'react-redux';
 import eventAPI from '../../api/eventApi';
@@ -35,15 +38,12 @@ import appColors from '../../constants/appColors';
 import {fontFamily} from '../../constants/fontFamily';
 import {AddressModel} from '../../models/AddressModel';
 import {EventModel} from '../../models/EventModel';
-import {authSelector} from '../../redux/reducers/authReducer';
+import {authSelector, AuthState} from '../../redux/reducers/authReducer';
 import {globalStyle} from '../../styles/GlobalStyle';
-import messaging, {
-  FirebaseMessagingTypes,
-} from '@react-native-firebase/messaging';
 
 const HomeScreen = ({navigation}: any) => {
   const dispatch = useDispatch();
-  const auth = useSelector(authSelector);
+  const auth: AuthState = useSelector(authSelector);
   const [currentLocation, setCurrentLocation] = useState<AddressModel>();
   const [eventsUpcoming, setEventsUpcoming] = useState<EventModel[]>([]);
   const [eventsNearby, setEventsNearby] = useState<EventModel[]>([]);
@@ -51,20 +51,41 @@ const HomeScreen = ({navigation}: any) => {
 
   useEffect(() => {
     setIsLoading(true);
-    Geolocation.getCurrentPosition(position => {
-      if (position.coords) {
-        reverseGeoCode({
-          lat: position.coords.latitude,
-          long: position.coords.longitude,
-        });
-      }
-    });
-    getEvents('upcoming');
-    messaging().onMessage(
-      async (mess: FirebaseMessagingTypes.RemoteMessage) => {
-        ToastAndroid.show(mess.notification?.title ?? '', ToastAndroid.SHORT);
+
+    Geolocation.getCurrentPosition(
+      position => {
+        
+        if (position.coords) {
+          reverseGeoCode({
+            lat: position.coords.latitude,
+            long: position.coords.longitude,
+          });
+        }
       },
+      error => {
+        console.error(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 30000, 
+        maximumAge: 0, 
+      }
     );
+    getEvents('upcoming');
+
+    // const unsubscribe = messaging().onMessage(
+    //   async (mess: FirebaseMessagingTypes.RemoteMessage) => {
+    //     Toast.show({
+    //       text1: mess.notification?.title,
+    //       text2: mess.notification?.body,
+    //       onPress: () => {
+    //         console.log(mess.data);
+    //       },
+    //     });
+    //   },
+    // );
+
+    // return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -75,7 +96,7 @@ const HomeScreen = ({navigation}: any) => {
   }, [currentLocation]);
 
   const reverseGeoCode = async ({lat, long}: {lat: number; long: number}) => {
-    const api = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${lat},${long}&lang=en-US&apiKey=N9V72HSRPAUfVoZp3W2CS_QDRBrnfET75fMxF15V3H4`;
+    const api = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${lat},${long}&lang=en-US&apiKey=lAwcm7SYqhRyI8eE5XLPYho7RBqw2IQ4nT5zoqrcJjY`;
 
     try {
       const res = await axios(api);
@@ -119,6 +140,7 @@ const HomeScreen = ({navigation}: any) => {
   return (
     <View style={[globalStyle.container]}>
       <StatusBar barStyle={'light-content'} />
+
       <View
         style={{
           backgroundColor: appColors.primary,
@@ -178,11 +200,7 @@ const HomeScreen = ({navigation}: any) => {
         <RowComponent>
           <RowComponent
             styles={{flex: 1}}
-            onPress={() =>
-              navigation.navigate('SearchEvents', {
-                isFilter: false,
-              })
-            }>
+            onPress={() => navigation.navigate('SearchEvents')}>
             <SearchNormal1
               variant="TwoTone"
               color={appColors.white}
@@ -223,7 +241,14 @@ const HomeScreen = ({navigation}: any) => {
       </View>
       <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
         <SectionComponent styles={{paddingHorizontal: 0, paddingTop: 15}}>
-          <TabBarComponent title="Upcoming Events" onPress={() => {}} />
+          <TabBarComponent
+            title="Upcoming Events"
+            onPress={() =>
+              navigation.navigate('ExplorerEvent', {
+                filter: 'upcoming',
+              })
+            }
+          />
           {eventsUpcoming && eventsUpcoming.length > 0 ? (
             <FlatList
               showsHorizontalScrollIndicator={false}
@@ -279,7 +304,24 @@ const HomeScreen = ({navigation}: any) => {
           </ImageBackground>
         </SectionComponent>
         <SectionComponent styles={{paddingHorizontal: 0}}>
-          <TabBarComponent title="Nearby You" onPress={() => {}} />
+          <TabBarComponent
+            title="Nearby You"
+            onPress={() => {
+              if (currentLocation) {
+                navigation.navigate('ExplorerEvent', {
+                  filter: 'nearby',
+                  currentLocation: currentLocation,
+                });
+              } else {
+                Toast.show({
+                  type: 'error',
+                  text1: 'Location Error',
+                  text2: 'Unable to determine your location.',
+                });
+              }
+            }}
+          />
+
           {eventsNearby && eventsNearby.length > 0 ? (
             <FlatList
               showsHorizontalScrollIndicator={false}

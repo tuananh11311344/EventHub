@@ -1,16 +1,16 @@
 import Geolocation from '@react-native-community/geolocation';
 import axios from 'axios';
-import { SearchNormal1 } from 'iconsax-react-native';
-import React, { useEffect, useState } from 'react';
+import {SearchNormal1} from 'iconsax-react-native';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Modal,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import Geocoder from 'react-native-geocoding';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, {Marker} from 'react-native-maps';
 import {
   ButtonComponent,
   InputComponent,
@@ -19,8 +19,8 @@ import {
   TextComponent,
 } from '../components';
 import appColors from '../constants/appColors';
-import { appInfo } from '../constants/appInfo';
-import { LocationModel } from '../models/LocationModel';
+import {appInfo} from '../constants/appInfo';
+import {LocationModel} from '../models/LocationModel';
 
 interface Props {
   visible: boolean;
@@ -38,19 +38,28 @@ const LocationModal = (props: Props) => {
   const [currentLocation, setCurrentLocation] = useState<LocationModel>();
 
   useEffect(() => {
-    Geolocation.getCurrentPosition(position => {
-
-      if (position.coords) {
-        setCurrentLocation({
-          lat: position.coords.latitude,
-          long: position.coords.longitude,
-        });
-        handleGetAddressFromPosition({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-      }
-    });
+    Geolocation.getCurrentPosition(
+      position => {
+        if (position.coords) {
+          setCurrentLocation({
+            lat: position.coords.latitude,
+            long: position.coords.longitude,
+          });
+          handleGetAddressFromPosition({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        }
+      },
+      error => {
+        console.error(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 0,
+      },
+    );
   }, []);
 
   useEffect(() => {
@@ -90,21 +99,21 @@ const LocationModal = (props: Props) => {
 
       if (response.data && response.data.address) {
         const address = response.data.display_name;
-        setLocationAddress(address); 
+        setLocationAddress(address);
         setCurrentLocation({
           lat: latitude,
           long: longitude,
         });
       } else {
         console.log('No address found for the given coordinates.');
-      } 
+      }
     } catch (error) {
       console.error('Error fetching address:', error);
     }
   };
 
   const handleSearchLocation = async () => {
-    // const api = `https://autocomplete.search.hereapi.com/v1/autocomplete?q=${searchKey}&limit=10&apiKey=N9V72HSRPAUfVoZp3W2CS_QDRBrnfET75fMxF15V3H4`;
+    // const api = `https://autocomplete.search.hereapi.com/v1/autocomplete?q=${searchKey}&limit=10&apiKey=lAwcm7SYqhRyI8eE5XLPYho7RBqw2IQ4nT5zoqrcJjY`;
     // const api = `https://nominatim.openstreetmap.org/reverse?lat=21.042090020364355&lon=105.817627763892`;
     const api = `https://nominatim.openstreetmap.org/search?q=${searchKey}&format=json&addressdetails=1&limit=20`;
     try {

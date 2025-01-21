@@ -5,6 +5,7 @@ import {
   ButtonComponent,
   RowComponent,
   SectionComponent,
+  SpaceComponent,
   TextComponent,
 } from '../../../components';
 import appColors from '../../../constants/appColors';
@@ -170,6 +171,7 @@ const AboutProfile = (props: Props) => {
             </TouchableOpacity>
           ))}
         </RowComponent>
+        <SpaceComponent height={20}/>
         {renderTabContent(tabSelected)}
       </SectionComponent>
       <LoadingModal visible={isLoading}/>
