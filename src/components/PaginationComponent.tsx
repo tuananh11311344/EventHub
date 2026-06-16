@@ -15,7 +15,7 @@ const PaginationComponent = (props: Props) => {
 
   const renderPageNumbers = () => {
     let pages = [];
-    const maxVisiblePages = 4;
+    const maxVisiblePages = 3;
     const startPage = Math.max(
       1,
       Math.min(
