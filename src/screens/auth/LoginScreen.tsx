@@ -1,5 +1,9 @@
-import React, {useEffect, useState} from 'react';
-import {Alert, Image, Switch} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Lock, Sms } from 'iconsax-react-native';
+import React, { useEffect, useState } from 'react';
+import { Image, Switch } from 'react-native';
+import { useDispatch } from 'react-redux';
+import authenticationAPI from '../../api/authApi';
 import {
   ButtonComponent,
   InputComponent,
@@ -9,17 +13,11 @@ import {
   TextComponent,
 } from '../../components';
 import ContainerComponent from '../../components/ContainerComponent';
-import {Lock, Sms} from 'iconsax-react-native';
 import appColors from '../../constants/appColors';
-import {fontFamily} from '../../constants/fontFamily';
+import { LoadingModal } from '../../modals';
+import { addAuth } from '../../redux/reducers/authReducer';
+import { AuthFormValues, validateAuthField } from '../../utils/authValidation';
 import SocialLogin from './component/SocialLogin';
-import authenticationAPI from '../../api/authApi';
-import {Validate} from '../../utils/validate';
-import {useDispatch} from 'react-redux';
-import {addAuth} from '../../redux/reducers/authReducer';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {AuthFormValues, validateAuthField} from '../../utils/authValidation';
-import {LoadingModal} from '../../modals';
 
 const LoginScreen = ({navigation}: any) => {
   const [email, setEmail] = useState('');
